@@ -1,0 +1,189 @@
+[
+  {
+    "id": "item_usb_drive",
+    "name": "Half-Eaten USB Drive",
+    "flavorText": "Contains someone's tax returns from 2004 and a 96kbps MP3 of Darude Sandstorm. Still slightly chew-marked.",
+    "rarity": 1,
+    "estimatedValue": 15,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_rusty_dock",
+    "icon": "memory",
+    "weightKg": 0.05
+  },
+  {
+    "id": "item_soggy_homework",
+    "name": "Soggy Calculus Homework",
+    "flavorText": "Conclusive proof that the dog didn't eat it; the river did. Received a damp B-minus.",
+    "rarity": 1,
+    "estimatedValue": 8,
+    "collectionTag": "Everyday Oddities",
+    "locationId": "loc_rusty_dock",
+    "icon": "description",
+    "weightKg": 0.15
+  },
+  {
+    "id": "item_croc_shoe",
+    "name": "Solo Left Lime-Green Croc",
+    "flavorText": "In 'Sport Mode'. Missing its right companion, but harbors a tiny colony of barnacles.",
+    "rarity": 1,
+    "estimatedValue": 22,
+    "collectionTag": "Everyday Oddities",
+    "locationId": "loc_rusty_dock",
+    "icon": "hiking",
+    "weightKg": 0.28
+  },
+  {
+    "id": "item_airpod_seaweed",
+    "name": "Left AirPod (Seaweed Wrap)",
+    "flavorText": "Somehow still playing a podcast at 2% battery. The host is talking about cryptocurrency.",
+    "rarity": 2,
+    "estimatedValue": 45,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_rusty_dock",
+    "icon": "headphones",
+    "weightKg": 0.02
+  },
+  {
+    "id": "item_floppy_disk",
+    "name": "Floppy Disk (Doom Installer 3/5)",
+    "flavorText": "Disk 3 of 5. Without the other four, humanity remains in perpetual suspense.",
+    "rarity": 2,
+    "estimatedValue": 55,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_rusty_dock",
+    "icon": "save",
+    "weightKg": 0.04
+  },
+  {
+    "id": "item_mysterious_button",
+    "name": "Mysterious Green Button",
+    "flavorText": "Labeled: 'DO NOT PUSH UNDER ANY CIRCUMSTANCE'. It has clearly been pressed 4,200 times.",
+    "rarity": 2,
+    "estimatedValue": 60,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_rusty_dock",
+    "icon": "radio_button_checked",
+    "weightKg": 0.35
+  },
+  {
+    "id": "item_traffic_cone",
+    "name": "Traffic Cone of Destiny",
+    "flavorText": "Radiates an authoritative aura that redirects interdimensional pedestrian traffic.",
+    "rarity": 3,
+    "estimatedValue": 120,
+    "collectionTag": "Everyday Oddities",
+    "locationId": "loc_rusty_dock",
+    "icon": "change_history",
+    "weightKg": 2.4
+  },
+  {
+    "id": "item_sentient_squeegee",
+    "name": "Sentient Gas Station Squeegee",
+    "flavorText": "Dripping with mysterious blue fluid. Whispers quiet cleaning advice when left unattended.",
+    "rarity": 3,
+    "estimatedValue": 160,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_neon_canal",
+    "icon": "cleaning_services",
+    "weightKg": 0.8
+  },
+  {
+    "id": "item_discoid_cassette",
+    "name": "Unwound Synthwave Cassette",
+    "flavorText": "Magnetic tape tangled like spaghetti. You can hear nostalgic drum machines if you hold it to your ear.",
+    "rarity": 3,
+    "estimatedValue": 140,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_neon_canal",
+    "icon": "cassette_tape",
+    "weightKg": 0.12
+  },
+  {
+    "id": "item_led_spatula",
+    "name": "RGB Gamer Spatula",
+    "flavorText": "Flipping pancakes at 144Hz with full Chroma synchronisation. Requires 3 AAA batteries.",
+    "rarity": 3,
+    "estimatedValue": 180,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_neon_canal",
+    "icon": "kitchen",
+    "weightKg": 0.45
+  },
+  {
+    "id": "item_rubber_chicken",
+    "name": "Pulley-Equipped Rubber Chicken",
+    "flavorText": "A legendary tool of retro pirate scoundrels. Makes an ear-splitting honk when pulled.",
+    "rarity": 4,
+    "estimatedValue": 350,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_neon_canal",
+    "icon": "pest_control",
+    "weightKg": 0.6
+  },
+  {
+    "id": "item_cursed_bowling_pin",
+    "name": "Cursed Bowling Pin",
+    "flavorText": "Knocks itself down at 3:00 AM every Tuesday. The lacquer smells like impending doom.",
+    "rarity": 4,
+    "estimatedValue": 420,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_neon_canal",
+    "icon": "sports_baseball",
+    "weightKg": 1.5
+  },
+  {
+    "id": "item_nokia_3310",
+    "name": "Unbreakable Brick Phone",
+    "flavorText": "Zero scratches despite spending 18 years on the riverbed. Battery is still at 78%. Snake game paused.",
+    "rarity": 5,
+    "estimatedValue": 999,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_rusty_dock",
+    "icon": "phone_android",
+    "weightKg": 3.8
+  },
+  {
+    "id": "item_cyber_gnome",
+    "name": "Tactical Cyber-Gnome MK-IV",
+    "flavorText": "Equipped with night-vision monocle and a tiny titanium spade. Guards the canal with grim determination.",
+    "rarity": 5,
+    "estimatedValue": 1250,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_neon_canal",
+    "icon": "smart_toy",
+    "weightKg": 4.2
+  },
+  {
+    "id": "item_quantum_toaster",
+    "name": "Quantum Bagel Toaster",
+    "flavorText": "The toast is simultaneously burnt and frozen until observed by the hungry diner.",
+    "rarity": 5,
+    "estimatedValue": 1600,
+    "collectionTag": "Cryptic Curios",
+    "locationId": "loc_abyssal_dump",
+    "icon": "bolt",
+    "weightKg": 5.0
+  },
+  {
+    "id": "item_y2k_bunker_key",
+    "name": "Key to Bunker Y2K",
+    "flavorText": "Stamped December 31, 1999. Inside is likely just 50,000 canned beans and spam tins.",
+    "rarity": 4,
+    "estimatedValue": 580,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_abyssal_dump",
+    "icon": "key",
+    "weightKg": 0.2
+  },
+  {
+    "id": "item_dialup_modem",
+    "name": "56k Dial-Up Shocker Box",
+    "flavorText": "Still shrieking the terrifying song of 1998 connectivity. Scares off all real fish instantly.",
+    "rarity": 4,
+    "estimatedValue": 490,
+    "collectionTag": "Tech Flotsam",
+    "locationId": "loc_abyssal_dump",
+    "icon": "router",
+    "weightKg": 1.9
+  }
+]

@@ -1,0 +1,53 @@
+[
+  {
+    "id": "loc_rusty_dock",
+    "name": "Rusty Scrapyard Pier",
+    "description": "An abandoned industrial dock where city runoff and urban legends converge.",
+    "difficulty": 1.0,
+    "unlocked": true,
+    "themeColor": "0xFF264653",
+    "waterColor": "0xFF2A9D8F",
+    "availableItemIds": [
+      "item_usb_drive",
+      "item_airpod_seaweed",
+      "item_soggy_homework",
+      "item_nokia_3310",
+      "item_traffic_cone",
+      "item_mysterious_button",
+      "item_croc_shoe",
+      "item_floppy_disk"
+    ]
+  },
+  {
+    "id": "loc_neon_canal",
+    "name": "Neon Drainage Canal",
+    "description": "Bioluminescent chemical runoff illuminated by buzzing pink billboard signs.",
+    "difficulty": 1.3,
+    "unlocked": true,
+    "themeColor": "0xFF2B0938",
+    "waterColor": "0xFFE76F51",
+    "availableItemIds": [
+      "item_sentient_squeegee",
+      "item_cyber_gnome",
+      "item_rubber_chicken",
+      "item_cursed_bowling_pin",
+      "item_discoid_cassette",
+      "item_led_spatula"
+    ]
+  },
+  {
+    "id": "loc_abyssal_dump",
+    "name": "Abyssal Tech Trench",
+    "description": "A deep trench where obsolete hardware and forgotten prototypes sink into eternity.",
+    "difficulty": 1.7,
+    "unlocked": false,
+    "themeColor": "0xFF1D3557",
+    "waterColor": "0xFF457B9D",
+    "availableItemIds": [
+      "item_cyber_gnome",
+      "item_quantum_toaster",
+      "item_y2k_bunker_key",
+      "item_dialup_modem"
+    ]
+  }
+]

@@ -1,0 +1,173 @@
+import 'package:flutter/material.dart';
+import '../../services/game_data_service.dart';
+
+class MapSheet extends StatelessWidget {
+  final GameDataService gameService;
+  final VoidCallback onLocationSelected;
+
+  const MapSheet({
+    super.key,
+    required this.gameService,
+    required this.onLocationSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final locations = gameService.locations;
+    final currentLocId = gameService.playerState.currentLocationId;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.70,
+      decoration: const BoxDecoration(
+        color: Color(0xFF131720),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.map, color: Colors.tealAccent),
+                const SizedBox(width: 10),
+                const Text(
+                  'Fishing Spots',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: locations.length,
+              itemBuilder: (context, index) {
+                final loc = locations[index];
+                final isCurrent = loc.id == currentLocId;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isCurrent ? const Color(0xFF20323F) : const Color(0xFF1E2430),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isCurrent ? Colors.tealAccent : Colors.white12,
+                      width: isCurrent ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          loc.unlocked ? Icons.waves : Icons.lock,
+                          color: loc.unlocked ? Colors.tealAccent : Colors.white38,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              loc.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 11,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Difficulty: ${loc.difficulty.toStringAsFixed(1)}x • ${loc.availableItemIds.length} items',
+                              style: TextStyle(
+                                color: Colors.teal.shade200,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (isCurrent)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.tealAccent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'HERE',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        )
+                      else if (loc.unlocked)
+                        ElevatedButton(
+                          onPressed: () async {
+                            await gameService.selectLocation(loc.id);
+                            onLocationSelected();
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2A9D8F),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('TRAVEL', style: TextStyle(fontSize: 11)),
+                        )
+                      else
+                        const Text(
+                          'LOCKED',
+                          style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

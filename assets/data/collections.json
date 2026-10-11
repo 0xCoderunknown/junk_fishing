@@ -1,0 +1,43 @@
+[
+  {
+    "id": "col_tech_flotsam",
+    "name": "Tech Flotsam",
+    "description": "Silicon relics and dead media tossed into the digital and physical depths.",
+    "rewardMoney": 1000,
+    "itemIds": [
+      "item_usb_drive",
+      "item_airpod_seaweed",
+      "item_floppy_disk",
+      "item_discoid_cassette",
+      "item_nokia_3310",
+      "item_y2k_bunker_key",
+      "item_dialup_modem"
+    ]
+  },
+  {
+    "id": "col_everyday_oddities",
+    "name": "Everyday Oddities",
+    "description": "Standard household items that took an unfortunate detour into aquatic oblivion.",
+    "rewardMoney": 500,
+    "itemIds": [
+      "item_soggy_homework",
+      "item_croc_shoe",
+      "item_traffic_cone"
+    ]
+  },
+  {
+    "id": "col_cryptic_curios",
+    "name": "Cryptic Curios",
+    "description": "Items possessing anomalous properties, sentient grudges, or inexplicable hardware.",
+    "rewardMoney": 2500,
+    "itemIds": [
+      "item_mysterious_button",
+      "item_sentient_squeegee",
+      "item_led_spatula",
+      "item_rubber_chicken",
+      "item_cursed_bowling_pin",
+      "item_cyber_gnome",
+      "item_quantum_toaster"
+    ]
+  }
+]
