@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [0.1.0] - 2026-11-04
 
 ### Changed
 - **Direct Tap-The-Hole Flow & Seamless Re-Cast Loop**:
@@ -55,10 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2026-10-11
+## [0.0.1] - 2026-10-11
 
 ### Added
-- **Core State Machine Architecture**:
+- **Initial Core Prototype & State Machine Architecture**:
   - Implemented `FishingState` enum (`idleMenu`, `readyToCast`, `rippleActive`, `pullingRod`, `resultModal`).
   - Implemented unified `MainFishingScreen` operating as a single-screen `Stack` with dynamic overlays.
 - **Data Models**:
