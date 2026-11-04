@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../engine/loot_engine.dart';
 import '../models/collection.dart';
 import '../models/item.dart';
 import '../models/location.dart';
@@ -22,9 +22,10 @@ class GameDataService {
   final Map<String, Item> _itemMap = {};
   final Map<String, Collection> _collectionMap = {};
 
+  final LootEngine _lootEngine = LootEngine();
+
   PlayerState _playerState = PlayerState.initial();
   bool _isLoaded = false;
-  final Random _random = Random();
 
   List<Location> get locations => List.unmodifiable(_locations);
   List<Item> get items => List.unmodifiable(_items);
@@ -121,62 +122,16 @@ class GameDataService {
     }
   }
 
-  /// Deterministic gacha / item roll for a fishing catch.
-  /// Rarity weights:
-  /// ★ 50%, ★★ 28%, ★★★ 14%, ★★★★ 6%, ★★★★★ 2%
+  /// Roll a fishing catch using the isolated LootEngine.
   Item? rollCatch({double timingBonus = 0.0}) {
     final location = currentLocation;
     if (location == null) return null;
-
-    final pool = location.availableItemIds
-        .map((id) => _itemMap[id])
-        .whereType<Item>()
-        .toList();
-
-    if (pool.isEmpty) {
-      // Fallback to any item if pool is empty
-      if (_items.isEmpty) return null;
-      return _items[_random.nextInt(_items.length)];
-    }
-
-    // Weight calculation based on rarity and timing bonus
-    // Higher timing accuracy slightly boosts higher tier probabilities
-    final List<MapEntry<Item, double>> weightedPool = pool.map((item) {
-      double baseWeight;
-      switch (item.rarity) {
-        case 1:
-          baseWeight = 50.0;
-          break;
-        case 2:
-          baseWeight = 28.0;
-          break;
-        case 3:
-          baseWeight = 14.0 + (timingBonus * 4.0);
-          break;
-        case 4:
-          baseWeight = 6.0 + (timingBonus * 3.0);
-          break;
-        case 5:
-          baseWeight = 2.0 + (timingBonus * 3.0);
-          break;
-        default:
-          baseWeight = 10.0;
-      }
-      return MapEntry(item, baseWeight);
-    }).toList();
-
-    final totalWeight = weightedPool.fold<double>(0.0, (sum, entry) => sum + entry.value);
-    final roll = _random.nextDouble() * totalWeight;
-
-    double cumulative = 0.0;
-    for (final entry in weightedPool) {
-      cumulative += entry.value;
-      if (roll <= cumulative) {
-        return entry.key;
-      }
-    }
-
-    return weightedPool.last.key;
+    return _lootEngine.rollCatch(
+      location: location,
+      itemMap: _itemMap,
+      fallbackItems: _items,
+      timingBonus: timingBonus,
+    );
   }
 
   /// Deduct 1 bait when fishing cast begins.
@@ -216,6 +171,7 @@ class GameDataService {
       inventory: updatedInventory,
       discoveredItemIds: updatedDiscovered,
     );
+
     await _savePlayerState();
     return value;
   }
@@ -228,10 +184,12 @@ class GameDataService {
     if (!collection.isComplete(_playerState.discoveredItemIds)) return false;
 
     final updatedClaimed = Set<String>.from(_playerState.claimedCollectionIds)..add(collectionId);
+
     _playerState = _playerState.copyWith(
       money: _playerState.money + collection.rewardMoney,
       claimedCollectionIds: updatedClaimed,
     );
+
     await _savePlayerState();
     return true;
   }
@@ -239,10 +197,12 @@ class GameDataService {
   /// Buy bait with money.
   Future<bool> buyBait({int amount = 5, int cost = 50}) async {
     if (_playerState.money < cost) return false;
+
     _playerState = _playerState.copyWith(
       money: _playerState.money - cost,
       baitCount: _playerState.baitCount + amount,
     );
+
     await _savePlayerState();
     return true;
   }
@@ -250,10 +210,12 @@ class GameDataService {
   /// Upgrade storage capacity.
   Future<bool> upgradeStorage({int extraSlots = 5, int cost = 150}) async {
     if (_playerState.money < cost) return false;
+
     _playerState = _playerState.copyWith(
       money: _playerState.money - cost,
       storageLimit: _playerState.storageLimit + extraSlots,
     );
+
     await _savePlayerState();
     return true;
   }
