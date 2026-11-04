@@ -45,7 +45,7 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
             color: Colors.black.withValues(alpha: 0.35),
           ),
 
-          // Speech bubble floating above fisherman (pierEdgeX ~ 0.38, pierEdgeY ~ 0.57)
+          // Speech bubble floating above fisherman
           AnimatedBuilder(
             animation: _wobbleController,
             builder: (context, child) {
@@ -53,7 +53,7 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
               final size = MediaQuery.of(context).size;
 
               return Positioned(
-                left: size.width * 0.20,
+                left: size.width * 0.18,
                 top: size.height * 0.38 + wobbleOffset,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,7 +106,7 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                       ),
                     ),
 
-                    // Pointer triangle pointing to character
+                    // Pointer triangle pointing down toward fisherman
                     Padding(
                       padding: const EdgeInsets.only(left: 36),
                       child: CustomPaint(
@@ -116,7 +116,7 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                     ),
 
                     const SizedBox(height: 12),
-                    // Tap to dismiss prompt
+                    // Clean, borderless Tap to continue prompt
                     Container(
                       margin: const EdgeInsets.only(left: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),

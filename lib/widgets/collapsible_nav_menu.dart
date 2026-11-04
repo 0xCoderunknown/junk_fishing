@@ -36,43 +36,49 @@ class CollapsibleNavMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // 1. Top HUD Bar (Money, Bait, Storage, Location)
+        // 1. Top HUD Bar (Wrapped with Flexible/Constrained children to prevent RenderFlex overflow)
         Positioned(
           top: MediaQuery.of(context).padding.top + 8,
           left: 12,
           right: 12,
           child: Row(
             children: [
-              // Current Location Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.place, color: Colors.tealAccent, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      currentLocation?.name ?? 'Unknown Pier',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+              // Current Location Badge (Flexible with text ellipsis)
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.place, color: Colors.tealAccent, size: 14),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          currentLocation?.name ?? 'Unknown Pier',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(width: 8),
 
               // Player Stats HUD (Money, Bait, Bag)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(24),
@@ -87,7 +93,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                       iconColor: Colors.amber,
                       label: '${playerState.money}',
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
 
                     // Bait
                     GestureDetector(
@@ -99,7 +105,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                         actionIcon: Icons.add_circle,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
 
                     // Storage
                     GestureDetector(
@@ -158,55 +164,41 @@ class CollapsibleNavMenu extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.cyan.shade200,
                               fontWeight: FontWeight.w900,
-                              fontSize: 12,
-                              letterSpacing: 1.2,
+                              letterSpacing: 1.5,
+                              fontSize: 13,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Divider(color: Colors.white12, height: 16),
+                    const Divider(color: Colors.white12, thickness: 1),
 
-                    // 1. FISH ACTION (Primary)
                     _buildMenuItem(
-                      icon: Icons.sports_esports,
+                      icon: Icons.phishing,
                       label: 'Cast Line',
-                      badge: 'PLAY',
-                      isHighlight: true,
-                      onTap: () => onAction(NavAction.fish),
+                      action: NavAction.fish,
+                      highlight: true,
                     ),
-                    const SizedBox(height: 6),
-
-                    // 2. INVENTORY
                     _buildMenuItem(
-                      icon: Icons.inventory_2_outlined,
+                      icon: Icons.backpack,
                       label: 'Inventory',
-                      badge: '${playerState.inventory.length}',
-                      onTap: () => onAction(NavAction.inventory),
+                      action: NavAction.inventory,
+                      badgeCount: playerState.inventory.length,
                     ),
-                    const SizedBox(height: 6),
-
-                    // 3. COLLECTIONS
                     _buildMenuItem(
-                      icon: Icons.auto_stories_outlined,
+                      icon: Icons.collections_bookmark,
                       label: 'Collections',
-                      onTap: () => onAction(NavAction.collections),
+                      action: NavAction.collections,
                     ),
-                    const SizedBox(height: 6),
-
-                    // 4. MAP
                     _buildMenuItem(
-                      icon: Icons.map_outlined,
-                      label: 'Map / Locations',
-                      onTap: () => onAction(NavAction.map),
+                      icon: Icons.map,
+                      label: 'Locations',
+                      action: NavAction.map,
                     ),
-                    const SizedBox(height: 6),
-
-                    // 5. SETTINGS
                     _buildMenuItem(
-                      icon: Icons.tune,
+                      icon: Icons.settings,
                       label: 'Settings',
-                      onTap: () => onAction(NavAction.settings),
+                      action: NavAction.settings,
                     ),
                   ],
                 ),
@@ -214,31 +206,79 @@ class CollapsibleNavMenu extends StatelessWidget {
 
               const SizedBox(width: 4),
 
-              // Collapse Toggle Handle
-              if (isVisible)
-                GestureDetector(
-                  onTap: onToggleCollapse,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xEE161B22),
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(12),
-                        bottomRight: Radius.circular(12),
-                      ),
-                      border: Border.all(color: Colors.white12),
+              // Drawer Toggle Handle Button
+              GestureDetector(
+                onTap: onToggleCollapse,
+                child: Container(
+                  width: 32,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xEE161B22),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
                     ),
+                    border: Border.all(color: Colors.white12, width: 1.5),
+                  ),
+                  child: Center(
                     child: Icon(
                       isCollapsed ? Icons.chevron_right : Icons.chevron_left,
-                      color: Colors.white70,
+                      color: Colors.cyanAccent,
                       size: 20,
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String label,
+    required NavAction action,
+    bool highlight = false,
+    int? badgeCount,
+  }) {
+    return ListTile(
+      dense: true,
+      visualDensity: VisualDensity.compact,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      leading: Icon(
+        icon,
+        color: highlight ? Colors.amberAccent : Colors.white70,
+        size: 18,
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          color: highlight ? Colors.amberAccent : Colors.white,
+          fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+          fontSize: 12,
+        ),
+      ),
+      trailing: badgeCount != null && badgeCount > 0
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.cyanAccent.shade700,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$badgeCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onTap: () => onAction(action),
     );
   }
 
@@ -249,90 +289,29 @@ class CollapsibleNavMenu extends StatelessWidget {
     IconData? actionIcon,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: iconColor, size: 16),
+          Icon(icon, color: iconColor, size: 14),
           const SizedBox(width: 4),
           Text(
             label,
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 11,
             ),
           ),
           if (actionIcon != null) ...[
             const SizedBox(width: 4),
-            Icon(actionIcon, color: Colors.white54, size: 14),
+            Icon(actionIcon, color: iconColor, size: 12),
           ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildMenuItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    String? badge,
-    bool isHighlight = false,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            color: isHighlight ? const Color(0xFF2A9D8F) : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                color: isHighlight ? Colors.white : Colors.white70,
-                size: 18,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: isHighlight ? Colors.white : Colors.white,
-                    fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              if (badge != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isHighlight
-                        ? Colors.black26
-                        : Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    badge,
-                    style: TextStyle(
-                      color: isHighlight ? Colors.amberAccent : Colors.white70,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -47,6 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full-screen hit detection allows the player to tap anywhere on the screen during the orange strike window to hook the fish.
 
 ### Fixed
+- **Timing Catch Guarantee & Direct State Synchronization**:
+  - Eliminated the race condition where `registerTap()` evaluated against sub-pixel distances rather than the active orange window state. Any tap while the ring is orange now **guarantees a successful catch**.
+  - Unified the visual orange state and the logical strike state into a single authoritative property with a generous 1100ms reaction window.
+- **Top HUD RenderFlex Overflow**:
+  - Fixed RenderFlex overflow on the top player bar by making the location chip `Flexible` with `TextOverflow.ellipsis` and tightening stat chip padding.
+- **Removed Distracting Prompt Ring**:
+  - Cleaned up the `ComicSpeechBubble` dismiss button by removing the distracting background border/ring around "TAP TO CONTINUE".
 - **Android Gradle Build Configuration**:
   - Disabled Kotlin incremental compilation (`kotlin.incremental=false` in `android/gradle.properties`) to resolve cross-drive Windows path resolution bug (`IllegalArgumentException: this and base files have different roots`).
   - Configured missing SDK build platform dependencies (`android-34`, `android-35`, `android-36`) and CMake 3.22.1 for JNI native plugin compilation.

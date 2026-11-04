@@ -1,13 +1,20 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../engine/fishing_timing_engine.dart';
 
 typedef RippleResolveCallback = void Function(bool success, double accuracy);
 
-/// Torchlight-style fishing timing overlay.
+/// Single self-contained Torchlight-style fishing timing overlay.
 ///
-/// Pure presentation widget connected to the headless [FishingTimingEngine].
+/// Built on a single AnimationController with explicit state checking:
+/// - Fixed inner ring (radius: 38px) with hook and bait.
+/// - Dynamic outer ring shrinks and expands with organic variations.
+/// - When in strike window:
+///   - Ring contacts inner circle and turns fiery ORANGE.
+///   - Haptic feedback fires.
+///   - Any tap while [isStrikeWindow] is true GUARANTEES a successful catch.
+///   - If missed, the ring smoothly opens back up and restarts a new tease pattern.
 class RippleTimingOverlay extends StatefulWidget {
   final RippleResolveCallback onResolve;
   final double difficultyMultiplier;
@@ -24,67 +31,172 @@ class RippleTimingOverlay extends StatefulWidget {
 
 class _RippleTimingOverlayState extends State<RippleTimingOverlay>
     with SingleTickerProviderStateMixin {
-  late final FishingTimingEngine _engine;
   late final AnimationController _animController;
+  final Random _rng = Random();
+
+  static const double innerRingRadius = 38.0;
+  static const double maxOuterRadius = 135.0;
+
+  double _currentRadius = maxOuterRadius;
+  double _startRadius = maxOuterRadius;
+  double _targetRadius = maxOuterRadius;
+
+  int _phaseStartTimeMs = 0;
+  int _phaseDurationMs = 1000;
+  Curve _phaseCurve = Curves.easeInOutSine;
+
+  bool _isStrikeWindow = false;
+  bool _resolved = false;
   bool _hapticFired = false;
+
+  late List<_PhaseData> _phases;
+  int _phaseIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _engine = FishingTimingEngine(
-      difficultyMultiplier: widget.difficultyMultiplier,
-    );
+    _generatePattern();
 
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )..addListener(_onFrameTick);
+    )..addListener(_onTick);
 
     _animController.repeat();
   }
 
-  void _onFrameTick() {
-    if (_engine.isFinished) return;
+  void _generatePattern() {
+    _phases = [];
+    final diff = widget.difficultyMultiplier;
 
-    _engine.update(DateTime.now().millisecondsSinceEpoch);
+    // 1 to 2 tease nibbles
+    final teaseCount = 1 + _rng.nextInt(2);
 
-    setState(() {});
+    for (int i = 0; i < teaseCount; i++) {
+      final isDeepTease = _rng.nextBool();
+      // Deep tease gets to 65-75px, shallow tease to 85-95px
+      final shrinkTo = isDeepTease
+          ? 65.0 + _rng.nextDouble() * 12.0
+          : 85.0 + _rng.nextDouble() * 20.0;
 
-    final inOrange = _engine.isInOrangeStrikeWindow;
-    if (inOrange && !_hapticFired) {
+      final shrinkMs = (1100 + _rng.nextInt(400)) ~/ diff;
+      _phases.add(_PhaseData(
+        targetRadius: shrinkTo,
+        durationMs: shrinkMs.clamp(900, 1500),
+        curve: Curves.easeInOutSine,
+        isStrike: false,
+      ));
+
+      final expandTo = min(maxOuterRadius, shrinkTo + 35.0 + _rng.nextDouble() * 35.0);
+      final expandMs = (1000 + _rng.nextInt(350)) ~/ diff;
+      _phases.add(_PhaseData(
+        targetRadius: expandTo,
+        durationMs: expandMs.clamp(800, 1400),
+        curve: Curves.easeInOutSine,
+        isStrike: false,
+      ));
+    }
+
+    // STRIKE CONTRACTION: Moves down to meet inner ring (38px)
+    final strikeDuration = (1200 + _rng.nextInt(250)) ~/ diff;
+    _phases.add(_PhaseData(
+      targetRadius: innerRingRadius,
+      durationMs: strikeDuration.clamp(950, 1500),
+      curve: Curves.easeInOutQuad,
+      isStrike: false,
+    ));
+
+    // STRIKE WINDOW: Locked on inner ring, turns fiery ORANGE!
+    // Generous 1100ms window for relaxed reaction
+    final windowMs = (1100 / diff).clamp(850, 1400).toInt();
+    _phases.add(_PhaseData(
+      targetRadius: innerRingRadius,
+      durationMs: windowMs,
+      curve: Curves.linear,
+      isStrike: true,
+    ));
+
+    // RETREAT: If missed, ring floats back out smoothly
+    final retreatRadius = maxOuterRadius - (_rng.nextDouble() * 15.0);
+    _phases.add(_PhaseData(
+      targetRadius: retreatRadius,
+      durationMs: 1100,
+      curve: Curves.easeOutSine,
+      isStrike: false,
+    ));
+
+    _applyPhase(0);
+  }
+
+  void _applyPhase(int index) {
+    if (index >= _phases.length) {
+      _generatePattern();
+      return;
+    }
+
+    _phaseIndex = index;
+    final phase = _phases[index];
+    _startRadius = _currentRadius;
+    _targetRadius = phase.targetRadius;
+    _phaseDurationMs = phase.durationMs;
+    _phaseCurve = phase.curve;
+    _isStrikeWindow = phase.isStrike;
+    _phaseStartTimeMs = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  void _onTick() {
+    if (_resolved) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final elapsed = now - _phaseStartTimeMs;
+    final progress = (elapsed / _phaseDurationMs).clamp(0.0, 1.0);
+    final curvedProgress = _phaseCurve.transform(progress);
+
+    setState(() {
+      _currentRadius = _startRadius + (_targetRadius - _startRadius) * curvedProgress;
+    });
+
+    if (_isStrikeWindow && !_hapticFired) {
       _hapticFired = true;
       HapticFeedback.selectionClick();
-    } else if (!inOrange) {
+    } else if (!_isStrikeWindow) {
       _hapticFired = false;
+    }
+
+    if (progress >= 1.0) {
+      _applyPhase(_phaseIndex + 1);
     }
   }
 
   void _handleTap() {
-    if (_engine.isFinished) return;
-
-    final result = _engine.registerTap();
+    if (_resolved) return;
+    _resolved = true;
     _animController.stop();
-    widget.onResolve(result.success, result.accuracy);
+
+    if (_isStrikeWindow) {
+      // GUARANTEED CATCH: Tapped during the orange strike window!
+      widget.onResolve(true, 1.0);
+    } else {
+      // Clicked too early while ring is still wandering/cyan
+      widget.onResolve(false, 0.0);
+    }
   }
 
   @override
   void dispose() {
     _animController.dispose();
-    _engine.stop();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final inStrikeZone = _engine.isInOrangeStrikeWindow;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _handleTap,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Atmospheric blurred backdrop
+          // 1. Atmospheric blur overlay
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
             child: Container(
@@ -102,16 +214,16 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: inStrikeZone
+                    color: _isStrikeWindow
                         ? const Color(0xFFFF9E00).withValues(alpha: 0.3)
                         : Colors.black54,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: inStrikeZone ? const Color(0xFFFF9E00) : Colors.white24,
-                      width: inStrikeZone ? 2.5 : 1.5,
+                      color: _isStrikeWindow ? const Color(0xFFFF9E00) : Colors.white24,
+                      width: _isStrikeWindow ? 2.5 : 1.5,
                     ),
                     boxShadow: [
-                      if (inStrikeZone)
+                      if (_isStrikeWindow)
                         BoxShadow(
                           color: const Color(0xFFFF9E00).withValues(alpha: 0.6),
                           blurRadius: 18,
@@ -123,15 +235,15 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        inStrikeZone ? Icons.flash_on : Icons.remove_red_eye_outlined,
-                        color: inStrikeZone ? const Color(0xFFFFD166) : Colors.white70,
+                        _isStrikeWindow ? Icons.flash_on : Icons.remove_red_eye_outlined,
+                        color: _isStrikeWindow ? const Color(0xFFFFD166) : Colors.white70,
                         size: 16,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        inStrikeZone ? 'BITE! HOOK NOW!' : 'WATCH THE WATER...',
+                        _isStrikeWindow ? 'BITE! HOOK NOW!' : 'WATCH THE WATER...',
                         style: TextStyle(
-                          color: inStrikeZone ? const Color(0xFFFFD166) : Colors.white70,
+                          color: _isStrikeWindow ? const Color(0xFFFFD166) : Colors.white70,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.5,
                           fontSize: 13,
@@ -142,34 +254,34 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                 ),
                 const SizedBox(height: 36),
 
-                // Dynamic Ring Canvas
+                // Canvas showing the hook & outer ring
                 SizedBox(
                   width: 300,
                   height: 300,
                   child: CustomPaint(
                     painter: _TorchlightRingPainter(
-                      currentOuterRadius: _engine.currentRadius,
-                      innerRadius: FishingTimingEngine.innerRingRadius,
-                      isInStrikeZone: inStrikeZone,
+                      currentOuterRadius: _currentRadius,
+                      innerRadius: innerRingRadius,
+                      isInStrikeZone: _isStrikeWindow,
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 36),
 
-                // Tap Action Prompt Button
+                // Action Prompt
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 15),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: inStrikeZone
+                      colors: _isStrikeWindow
                           ? [const Color(0xFFFF9E00), const Color(0xFFFF5400)]
                           : [const Color(0xFF2B2D42), const Color(0xFF1E1E24)],
                     ),
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
-                      if (inStrikeZone)
+                      if (_isStrikeWindow)
                         BoxShadow(
                           color: const Color(0xFFFF5400).withValues(alpha: 0.65),
                           blurRadius: 22,
@@ -182,14 +294,14 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     children: [
                       Icon(
                         Icons.touch_app,
-                        color: inStrikeZone ? Colors.white : Colors.white54,
+                        color: _isStrikeWindow ? Colors.white : Colors.white54,
                         size: 24,
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        inStrikeZone ? 'CLICK ANYWHERE!' : 'WAIT FOR ORANGE...',
+                        _isStrikeWindow ? 'CLICK ANYWHERE!' : 'WAIT FOR ORANGE...',
                         style: TextStyle(
-                          color: inStrikeZone ? Colors.white : Colors.white60,
+                          color: _isStrikeWindow ? Colors.white : Colors.white60,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2,
                           fontSize: 16,
@@ -216,6 +328,20 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
   }
 }
 
+class _PhaseData {
+  final double targetRadius;
+  final int durationMs;
+  final Curve curve;
+  final bool isStrike;
+
+  _PhaseData({
+    required this.targetRadius,
+    required this.durationMs,
+    required this.curve,
+    required this.isStrike,
+  });
+}
+
 class _TorchlightRingPainter extends CustomPainter {
   final double currentOuterRadius;
   final double innerRadius;
@@ -231,7 +357,7 @@ class _TorchlightRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
 
-    // 1. Water ripple background behind hook
+    // 1. Water ripple background
     final ambientWaterPaint = Paint()
       ..color = const Color(0xFF0077B6).withValues(alpha: 0.12)
       ..style = PaintingStyle.fill;
@@ -261,7 +387,7 @@ class _TorchlightRingPainter extends CustomPainter {
     // Central Bait / Hook Icon
     _drawBaitHook(canvas, center, isInStrikeZone);
 
-    // 3. Dynamic Shrinking/Expanding Outer Ring
+    // 3. Dynamic Outer Ring: ORANGE when in strike, CYAN when teasing
     final outerRingColor =
         isInStrikeZone ? const Color(0xFFFF5400) : const Color(0xFF90E0EF);
 
@@ -282,9 +408,9 @@ class _TorchlightRingPainter extends CustomPainter {
       ..color = outerRingColor
       ..style = PaintingStyle.fill;
     for (int i = 0; i < 4; i++) {
-      final angle = (i * 3.141592653589793 / 2) + (currentOuterRadius * 0.05);
-      final bx = center.dx + (currentOuterRadius * (angle == 0 ? 1 : (angle > 3 ? -1 : 0))); // simplified angle offsets
-      final by = center.dy + (currentOuterRadius * (angle > 1 && angle < 4 ? 1 : -1));
+      final angle = (i * pi / 2) + (currentOuterRadius * 0.05);
+      final bx = center.dx + cos(angle) * currentOuterRadius;
+      final by = center.dy + sin(angle) * currentOuterRadius;
       canvas.drawCircle(Offset(bx, by), isInStrikeZone ? 4.5 : 2.5, beadPaint);
     }
   }
@@ -315,7 +441,7 @@ class _TorchlightRingPainter extends CustomPainter {
 
     // Curved barb
     final arcRect = Rect.fromCircle(center: Offset(center.dx - 6, center.dy + 4), radius: 6);
-    canvas.drawArc(arcRect, 0, 3.141592653589793, false, hookPaint);
+    canvas.drawArc(arcRect, 0, pi, false, hookPaint);
 
     // Upward barb point
     canvas.drawLine(
