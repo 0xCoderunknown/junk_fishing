@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.3] - 2026-11-04
 
+### Added
+- **Custom Hook Launcher App Icon**:
+  - Incorporated `hook.png` into `assets/images/app_icon.png`.
+  - Generated full-density Android launcher icons across all mipmap targets (`mdpi` 48x48, `hdpi` 72x72, `xhdpi` 96x96, `xxhdpi` 144x144, `xxxhdpi` 192x192) with high-quality bicubic interpolation and transparency.
+
 ### Refactored & Optimized (Codebase Refactor Audit)
 - **Zero Flutter UI Dependencies in Engine** (`lib/engine/fishing_timing_engine.dart`):
   - Removed `package:flutter/animation.dart` and implemented pure Dart `EasingCurves` (`linear`, `easeInOut`, `easeIn`, `easeOut`, `decelerate`) with a `typedef EasingCurve = double Function(double t)` signature.
