@@ -2,19 +2,21 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../engine/fishing_timing_engine.dart';
 
 typedef RippleResolveCallback = void Function(bool success, double accuracy);
 
 /// Single self-contained Torchlight-style fishing timing overlay.
 ///
-/// Built on a single AnimationController with explicit state checking:
+/// Driven directly by [FishingTimingEngine]:
 /// - Fixed inner ring (radius: 38px) with hook and bait.
-/// - Dynamic outer ring shrinks and expands with organic variations.
+/// - Dynamic outer ring moves unpredictably with micro-nibbles, creeping crawls,
+///   and fake-outs before surging in.
 /// - When in strike window:
-///   - Ring contacts inner circle and turns fiery ORANGE.
+///   - Ring contacts inner circle and turns fiery ORANGE for ~500ms.
 ///   - Haptic feedback fires.
 ///   - Any tap while [isStrikeWindow] is true GUARANTEES a successful catch.
-///   - If missed, the ring smoothly opens back up and restarts a new tease pattern.
+///   - If missed, the ring smoothly opens back up and restarts a new unpredictable pattern.
 class RippleTimingOverlay extends StatefulWidget {
   final RippleResolveCallback onResolve;
   final double difficultyMultiplier;
@@ -32,30 +34,21 @@ class RippleTimingOverlay extends StatefulWidget {
 class _RippleTimingOverlayState extends State<RippleTimingOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
-  final Random _rng = Random();
+  late final FishingTimingEngine _engine;
 
-  static const double innerRingRadius = 38.0;
-  static const double maxOuterRadius = 135.0;
+  static const double innerRingRadius = FishingTimingEngine.innerRingRadius;
 
-  double _currentRadius = maxOuterRadius;
-  double _startRadius = maxOuterRadius;
-  double _targetRadius = maxOuterRadius;
-
-  int _phaseStartTimeMs = 0;
-  int _phaseDurationMs = 1000;
-  Curve _phaseCurve = Curves.easeInOutSine;
-
+  double _currentRadius = FishingTimingEngine.maxOuterRadius;
   bool _isStrikeWindow = false;
   bool _resolved = false;
   bool _hapticFired = false;
 
-  late List<_PhaseData> _phases;
-  int _phaseIndex = 0;
-
   @override
   void initState() {
     super.initState();
-    _generatePattern();
+    _engine = FishingTimingEngine(
+      difficultyMultiplier: widget.difficultyMultiplier,
+    );
 
     _animController = AnimationController(
       vsync: this,
@@ -65,106 +58,23 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
     _animController.repeat();
   }
 
-  void _generatePattern() {
-    _phases = [];
-    final diff = widget.difficultyMultiplier;
-
-    // 1 to 2 tease nibbles
-    final teaseCount = 1 + _rng.nextInt(2);
-
-    for (int i = 0; i < teaseCount; i++) {
-      final isDeepTease = _rng.nextBool();
-      // Deep tease gets to 65-75px, shallow tease to 85-95px
-      final shrinkTo = isDeepTease
-          ? 65.0 + _rng.nextDouble() * 12.0
-          : 85.0 + _rng.nextDouble() * 20.0;
-
-      final shrinkMs = (1100 + _rng.nextInt(400)) ~/ diff;
-      _phases.add(_PhaseData(
-        targetRadius: shrinkTo,
-        durationMs: shrinkMs.clamp(900, 1500),
-        curve: Curves.easeInOutSine,
-        isStrike: false,
-      ));
-
-      final expandTo = min(maxOuterRadius, shrinkTo + 35.0 + _rng.nextDouble() * 35.0);
-      final expandMs = (1000 + _rng.nextInt(350)) ~/ diff;
-      _phases.add(_PhaseData(
-        targetRadius: expandTo,
-        durationMs: expandMs.clamp(800, 1400),
-        curve: Curves.easeInOutSine,
-        isStrike: false,
-      ));
-    }
-
-    // STRIKE CONTRACTION: Moves down to meet inner ring (38px)
-    final strikeDuration = (1200 + _rng.nextInt(250)) ~/ diff;
-    _phases.add(_PhaseData(
-      targetRadius: innerRingRadius,
-      durationMs: strikeDuration.clamp(950, 1500),
-      curve: Curves.easeInOutQuad,
-      isStrike: false,
-    ));
-
-    // STRIKE WINDOW: Locked on inner ring, turns fiery ORANGE!
-    // Generous 1100ms window for relaxed reaction
-    final windowMs = (1100 / diff).clamp(850, 1400).toInt();
-    _phases.add(_PhaseData(
-      targetRadius: innerRingRadius,
-      durationMs: windowMs,
-      curve: Curves.linear,
-      isStrike: true,
-    ));
-
-    // RETREAT: If missed, ring floats back out smoothly
-    final retreatRadius = maxOuterRadius - (_rng.nextDouble() * 15.0);
-    _phases.add(_PhaseData(
-      targetRadius: retreatRadius,
-      durationMs: 1100,
-      curve: Curves.easeOutSine,
-      isStrike: false,
-    ));
-
-    _applyPhase(0);
-  }
-
-  void _applyPhase(int index) {
-    if (index >= _phases.length) {
-      _generatePattern();
-      return;
-    }
-
-    _phaseIndex = index;
-    final phase = _phases[index];
-    _startRadius = _currentRadius;
-    _targetRadius = phase.targetRadius;
-    _phaseDurationMs = phase.durationMs;
-    _phaseCurve = phase.curve;
-    _isStrikeWindow = phase.isStrike;
-    _phaseStartTimeMs = DateTime.now().millisecondsSinceEpoch;
-  }
-
   void _onTick() {
     if (_resolved) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
-    final elapsed = now - _phaseStartTimeMs;
-    final progress = (elapsed / _phaseDurationMs).clamp(0.0, 1.0);
-    final curvedProgress = _phaseCurve.transform(progress);
+    _engine.update(now);
 
+    final isOrange = _engine.isInOrangeStrikeWindow;
     setState(() {
-      _currentRadius = _startRadius + (_targetRadius - _startRadius) * curvedProgress;
+      _currentRadius = _engine.currentRadius;
+      _isStrikeWindow = isOrange;
     });
 
-    if (_isStrikeWindow && !_hapticFired) {
+    if (isOrange && !_hapticFired) {
       _hapticFired = true;
       HapticFeedback.selectionClick();
-    } else if (!_isStrikeWindow) {
+    } else if (!isOrange) {
       _hapticFired = false;
-    }
-
-    if (progress >= 1.0) {
-      _applyPhase(_phaseIndex + 1);
     }
   }
 
@@ -173,17 +83,13 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
     _resolved = true;
     _animController.stop();
 
-    if (_isStrikeWindow) {
-      // GUARANTEED CATCH: Tapped during the orange strike window!
-      widget.onResolve(true, 1.0);
-    } else {
-      // Clicked too early while ring is still wandering/cyan
-      widget.onResolve(false, 0.0);
-    }
+    final result = _engine.registerTap();
+    widget.onResolve(result.success, result.accuracy);
   }
 
   @override
   void dispose() {
+    _engine.stop();
     _animController.dispose();
     super.dispose();
   }
@@ -326,20 +232,6 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
       ),
     );
   }
-}
-
-class _PhaseData {
-  final double targetRadius;
-  final int durationMs;
-  final Curve curve;
-  final bool isStrike;
-
-  _PhaseData({
-    required this.targetRadius,
-    required this.durationMs,
-    required this.curve,
-    required this.isStrike,
-  });
 }
 
 class _TorchlightRingPainter extends CustomPainter {

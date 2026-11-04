@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/fishing_state.dart';
 import '../models/location.dart';
@@ -131,61 +130,39 @@ class _IsometricWorldState extends State<IsometricWorld>
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: widget.onPondTap,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.amberAccent.withValues(
-                              alpha: 0.35 +
-                                  0.35 *
-                                      sin(_ambientController.value * 2 * pi)
-                                          .abs(),
-                            ),
-                            width: 2.5,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00E5FF)
-                                  .withValues(alpha: 0.25),
-                              blurRadius: 24,
-                              spreadRadius: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.75),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.amberAccent,
+                              width: 1.5,
                             ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.75),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.touch_app,
                                 color: Colors.amberAccent,
-                                width: 1.5,
+                                size: 18,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.touch_app,
-                                  color: Colors.amberAccent,
-                                  size: 18,
+                              const SizedBox(width: 6),
+                              Text(
+                                'TAP THE HOLE',
+                                style: TextStyle(
+                                  color: Colors.amber.shade200,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.4,
+                                  fontSize: 12,
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'TAP THE HOLE',
-                                  style: TextStyle(
-                                    color: Colors.amber.shade200,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.4,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

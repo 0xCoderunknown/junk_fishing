@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-04
 
 ### Changed
+- **Unpredictable, Non-Rhythmic Fishing Motion Engine**:
+  - Upgraded `FishingTimingEngine` to eliminate rhythmic metronome oscillations and deliver organic, unpredictable fish behavior:
+    - Procedurally generates 2–4 randomized teaser actions before every strike: jittery micro-twitches (180ms–260ms), slow creeping crawls (900ms–1800ms), wandering drifts, and deceptive fake-outs that surge down to 46px–60px, freeze on the brink of the hook, and suddenly bolt back out.
+    - Utilizes diverse easing curves (`Curves.fastOutSlowIn`, `Curves.easeOutCubic`, `Curves.easeInOutCubic`, `Curves.easeOutQuad`) and variable durations.
+  - **Halved Orange Strike Window**: Cut the orange strike duration in half from ~1100ms down to ~500ms (400ms–650ms difficulty-scaled) for a tight, authentic bite reaction window.
+  - Connected `RippleTimingOverlay` directly to `FishingTimingEngine`, establishing a single source of truth and removing duplicated animation state.
+- **Removed Outer Border/Glow Circle from "TAP THE HOLE"**:
+  - Removed the outer pulsating amber/cyan circle border and box shadow container over the stone well in `IsometricWorld`, leaving only the clean central touch badge while keeping the entire hole surface touch-sensitive.
 - **Direct Tap-The-Hole Flow & Seamless Re-Cast Loop**:
   - The game now launches immediately in the `readyToCast` state with the animated **"TAP THE HOLE"** prompt active over the stone well, eliminating the redundant "start game" step.
   - The collapsible HUD drawer remains accessible on the left while keeping the hole ready to cast.

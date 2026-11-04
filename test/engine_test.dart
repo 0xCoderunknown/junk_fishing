@@ -24,6 +24,32 @@ void main() {
       expect(engine.isFinished, true);
     });
 
+    test('Strike window duration is halved to ~500ms and guarantees catch on tap', () {
+      final engine = FishingTimingEngine();
+      
+      // Advance to strike window by stepping simulation
+      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+      bool foundOrange = false;
+
+      for (int i = 0; i < 200; i++) {
+        simulatedTime += 50;
+        engine.update(simulatedTime);
+        if (engine.isInOrangeStrikeWindow) {
+          foundOrange = true;
+          break;
+        }
+      }
+
+      expect(foundOrange, true, reason: 'Engine should reach orange strike window');
+      expect(engine.currentPhase?.type, TimingPhaseType.strikeWindow);
+      expect(engine.currentPhase?.durationMs, inInclusiveRange(400, 650));
+
+      // Tapping during orange window guarantees catch
+      final tapResult = engine.registerTap();
+      expect(tapResult.success, true);
+      expect(tapResult.accuracy, 1.0);
+    });
+
     test('Engine updates radius over time and recycles cycle without finish', () {
       final engine = FishingTimingEngine();
       final now = DateTime.now().millisecondsSinceEpoch;
