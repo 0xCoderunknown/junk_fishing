@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,7 +10,7 @@ import '../models/item.dart';
 import '../models/location.dart';
 import '../models/player_state.dart';
 
-class GameDataService {
+class GameDataService extends ChangeNotifier {
   static final GameDataService _instance = GameDataService._internal();
 
   factory GameDataService() => _instance;
@@ -91,9 +92,11 @@ class GameDataService {
       await _loadPlayerState();
 
       _isLoaded = true;
+      notifyListeners();
     } catch (e) {
       // Fallback in case of error
       _isLoaded = true;
+      notifyListeners();
     }
   }
 
@@ -121,6 +124,7 @@ class GameDataService {
     } catch (_) {
       // Best effort save
     }
+    notifyListeners();
   }
 
   Item? getItemById(String id) => _itemMap[id];
@@ -215,6 +219,30 @@ class GameDataService {
 
     await _savePlayerState();
     return value;
+  }
+
+  /// Atomically sells all items in inventory in a single pass with one storage write.
+  /// Returns the total coins gained.
+  Future<int> sellAllScrap() async {
+    final inventory = _playerState.inventory;
+    if (inventory.isEmpty) return 0;
+
+    int totalGain = 0;
+    final updatedDiscovered = Set<String>.from(_playerState.discoveredItemIds);
+
+    for (final item in inventory) {
+      totalGain += item.estimatedValue;
+      updatedDiscovered.add(item.id);
+    }
+
+    _playerState = _playerState.copyWith(
+      money: _playerState.money + totalGain,
+      inventory: const [],
+      discoveredItemIds: updatedDiscovered,
+    );
+
+    await _savePlayerState();
+    return totalGain;
   }
 
   /// Claim completion reward for a collection.

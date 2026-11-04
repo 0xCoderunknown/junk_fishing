@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:junk_fishing/engine/fishing_timing_engine.dart';
 import 'package:junk_fishing/models/collection.dart';
 import 'package:junk_fishing/models/fishing_state.dart';
 import 'package:junk_fishing/models/item.dart';
@@ -66,6 +67,50 @@ void main() {
       final full = {'item_a', 'item_b', 'item_c', 'item_d', 'extra_item'};
       expect(collection.progress(full), 1.0);
       expect(collection.isComplete(full), true);
+
+      final statusPartial = collection.getStatus(discovered);
+      expect(statusPartial.found, 2);
+      expect(statusPartial.total, 4);
+      expect(statusPartial.progress, 0.5);
+      expect(statusPartial.isComplete, false);
+
+      final statusFull = collection.getStatus({'item_a', 'item_b', 'item_c', 'item_d'});
+      expect(statusFull.found, 4);
+      expect(statusFull.isComplete, true);
+    });
+
+    test('Item equality and hashCode are consistent', () {
+      const item1 = Item(
+        id: 'boot_1',
+        name: 'Old Boot',
+        flavorText: 'A soggy boot',
+        rarity: 1,
+        estimatedValue: 25,
+        collectionTag: 'Scrap',
+        locationId: 'loc_dock',
+      );
+      const item2 = Item(
+        id: 'boot_1',
+        name: 'Old Boot',
+        flavorText: 'A soggy boot',
+        rarity: 1,
+        estimatedValue: 25,
+        collectionTag: 'Scrap',
+        locationId: 'loc_dock',
+      );
+      const item3 = Item(
+        id: 'boot_2',
+        name: 'Other Boot',
+        flavorText: 'Different boot',
+        rarity: 1,
+        estimatedValue: 25,
+        collectionTag: 'Scrap',
+        locationId: 'loc_dock',
+      );
+
+      expect(item1, equals(item2));
+      expect(item1.hashCode, equals(item2.hashCode));
+      expect(item1, isNot(equals(item3)));
     });
 
     test('PlayerState storage, bait, and copyWith', () {
@@ -116,6 +161,25 @@ void main() {
       expect(getItemIconData('unknown_icon'), isNotNull);
       expect(getRarityColor(1), isNotNull);
       expect(getRarityColor(5), isNotNull);
+    });
+
+    test('EasingCurves boundary and midpoint values are mathematically sound', () {
+      expect(EasingCurves.linear(0.0), 0.0);
+      expect(EasingCurves.linear(1.0), 1.0);
+
+      expect(EasingCurves.easeInOut(0.0), 0.0);
+      expect(EasingCurves.easeInOut(0.5), 0.5);
+      expect(EasingCurves.easeInOut(1.0), 1.0);
+
+      expect(EasingCurves.easeIn(0.0), 0.0);
+      expect(EasingCurves.easeIn(1.0), 1.0);
+
+      expect(EasingCurves.easeOut(0.0), 0.0);
+      expect(EasingCurves.easeOut(1.0), 1.0);
+
+      expect(EasingCurves.decelerate(0.0), 0.0);
+      expect(EasingCurves.decelerate(1.0), 1.0);
+      expect(EasingCurves.decelerate(0.5), 0.75);
     });
   });
 }

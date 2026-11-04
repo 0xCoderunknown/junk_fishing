@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.3] - 2026-11-04
+
+### Refactored & Optimized (Codebase Refactor Audit)
+- **Zero Flutter UI Dependencies in Engine** (`lib/engine/fishing_timing_engine.dart`):
+  - Removed `package:flutter/animation.dart` and implemented pure Dart `EasingCurves` (`linear`, `easeInOut`, `easeIn`, `easeOut`, `decelerate`) with a `typedef EasingCurve = double Function(double t)` signature.
+  - Ensures `lib/engine/` strictly adheres to Pillar III (100% pure Dart mechanics).
+- **Atomic Single-Pass Scrap Selling** (`lib/services/game_data_service.dart`):
+  - Introduced `sellAllScrap()` which computes total value, clears inventory, updates discovered items, and executes a single atomic write to `SharedPreferences`, replacing O(N) sequential disk write loops in inventory and market sheets.
+- **Service Reactivity** (`lib/services/game_data_service.dart`):
+  - Extended `ChangeNotifier` so data service state mutations automatically notify listening widgets.
+- **Unified Modal Shell Architecture** (`lib/widgets/modals/game_bottom_sheet.dart`):
+  - Created reusable `GameBottomSheet` standardizing sheet height, drag handle, dark container styling, and header rows across `InventorySheet`, `MarketSheet`, `CollectionsSheet`, `MapSheet`, and `SettingsSheet`.
+- **Render & Animation Performance Optimizations**:
+  - `IsometricWorld`: Wrapped static environment layers (`EnvironmentPainter`, `LanternLightingPainter`) in `RepaintBoundary` to decouple them from the high-frequency ripple animation.
+  - `RippleTimingOverlay`: Isolated `BackdropFilter` in a `RepaintBoundary` so high-frequency ring ticks do not invalidate expensive GPU blur textures.
+  - `ComicSpeechBubble`: Replaced `Positioned` layout updates with GPU-accelerated `Transform.translate` within `AnimatedBuilder`.
+- **Model Integrity & Deduplication**:
+  - `Item`: Implemented `operator ==` and `hashCode` based on item attributes.
+  - `Collection`: Added single-pass `getStatus()` returning `({int found, int total, double progress, bool isComplete})` to eliminate duplicate set operations.
+- **Dead Code Cleanup & Platform Conformance**:
+  - Removed unused `onBuyBait` and `onUpgradeStorage` callbacks from `CollapsibleNavMenu` and `MainFishingScreen`.
+  - Removed unused `playerState` constructor parameter from `InventorySheet`.
+  - Locked orientation strictly to `[DeviceOrientation.portraitUp]` in `lib/main.dart` per `AGENTS.md`.
+  - Corrected `SettingsSheet` copy to reflect actual initial balance (150 coins, 20 bait).
+
 ## [0.1.2] - 2026-11-04
 
 ### Fixed

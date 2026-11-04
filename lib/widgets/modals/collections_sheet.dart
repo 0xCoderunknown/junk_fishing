@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/game_data_service.dart';
 import '../../utils/item_icon_helper.dart';
+import 'game_bottom_sheet.dart';
 
 class CollectionsSheet extends StatelessWidget {
   final GameDataService gameService;
@@ -18,68 +19,25 @@ class CollectionsSheet extends StatelessWidget {
     final collections = gameService.collections;
     final playerState = gameService.playerState;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Color(0xFF131720),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return GameBottomSheet(
+      heightFactor: 0.85,
+      titleIcon: Icons.auto_stories,
+      titleIconColor: Colors.cyanAccent,
+      title: 'Absurd Collections',
+      trailing: Text(
+        '${playerState.claimedCollectionIds.length}/${collections.length} Claimed',
+        style: const TextStyle(color: Colors.white60, fontSize: 12),
       ),
-      child: Column(
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Icon(Icons.auto_stories, color: Colors.cyanAccent),
-                const SizedBox(width: 10),
-                const Text(
-                  'Absurd Collections',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${playerState.claimedCollectionIds.length}/${collections.length} Claimed',
-                  style: const TextStyle(color: Colors.white60, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-
-          // Collection List
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: collections.length,
-              itemBuilder: (context, index) {
-                final col = collections[index];
-                final isClaimed = playerState.claimedCollectionIds.contains(
-                  col.id,
-                );
-                final isComplete = col.isComplete(
-                  playerState.discoveredItemIds,
-                );
-                final progress = col.progress(playerState.discoveredItemIds);
-                final discoveredCount = col.itemIds
-                    .where(playerState.discoveredItemIds.contains)
-                    .length;
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: collections.length,
+        itemBuilder: (context, index) {
+          final col = collections[index];
+          final isClaimed = playerState.claimedCollectionIds.contains(col.id);
+          final status = col.getStatus(playerState.discoveredItemIds);
+          final isComplete = status.isComplete;
+          final progress = status.progress;
+          final discoveredCount = status.found;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
@@ -263,9 +221,6 @@ class CollectionsSheet extends StatelessWidget {
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

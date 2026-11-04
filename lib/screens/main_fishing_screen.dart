@@ -175,7 +175,6 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => InventorySheet(
-        playerState: _gameService.playerState,
         gameService: _gameService,
         onStateChanged: () => setState(() {}),
       ),
@@ -227,22 +226,6 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
         onReset: () => setState(() {}),
       ),
     );
-  }
-
-  Future<void> _buyBait() async {
-    final success = await _gameService.buyBait(amount: 5, cost: 50);
-    if (success) {
-      HapticFeedback.lightImpact();
-      setState(() {});
-    }
-  }
-
-  Future<void> _upgradeStorage() async {
-    final success = await _gameService.upgradeStorage(extraSlots: 5, cost: 150);
-    if (success) {
-      HapticFeedback.lightImpact();
-      setState(() {});
-    }
   }
 
   @override
@@ -297,8 +280,6 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
             onToggleCollapse: () {
               setState(() => _menuCollapsed = !_menuCollapsed);
             },
-            onBuyBait: _buyBait,
-            onUpgradeStorage: _upgradeStorage,
           ),
 
           // -------------------------------------------------------------

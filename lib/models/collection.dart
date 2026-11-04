@@ -49,4 +49,26 @@ class Collection {
     final count = itemIds.where(set.contains).length;
     return count / itemIds.length;
   }
+
+  /// Single-pass calculation of completion status to eliminate duplicate set operations.
+  ({int found, int total, double progress, bool isComplete}) getStatus(
+    Set<String> discoveredItemIds,
+  ) {
+    if (itemIds.isEmpty) {
+      return (found: 0, total: 0, progress: 0.0, isComplete: false);
+    }
+    int count = 0;
+    for (final id in itemIds) {
+      if (discoveredItemIds.contains(id)) {
+        count++;
+      }
+    }
+    final ratio = count / itemIds.length;
+    return (
+      found: count,
+      total: itemIds.length,
+      progress: ratio,
+      isComplete: count == itemIds.length,
+    );
+  }
 }

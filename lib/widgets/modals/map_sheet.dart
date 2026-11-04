@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/game_data_service.dart';
+import 'game_bottom_sheet.dart';
 
 class MapSheet extends StatefulWidget {
   final GameDataService gameService;
@@ -26,75 +27,34 @@ class _MapSheetState extends State<MapSheet> {
     final currentLocId = widget.gameService.playerState.currentLocationId;
     final playerMoney = widget.gameService.playerState.money;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.70,
-      decoration: const BoxDecoration(
-        color: Color(0xFF131720),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+    return GameBottomSheet(
+      heightFactor: 0.70,
+      titleIcon: Icons.map,
+      titleIconColor: Colors.tealAccent,
+      title: 'Fishing Spots',
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black45,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🪙 ', style: TextStyle(fontSize: 12)),
+            Text(
+              '$playerMoney',
+              style: const TextStyle(
+                color: Colors.amberAccent,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Icon(Icons.map, color: Colors.tealAccent),
-                const SizedBox(width: 10),
-                const Text(
-                  'Fishing Spots',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black45,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.amber.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🪙 ', style: TextStyle(fontSize: 12)),
-                      Text(
-                        '$playerMoney',
-                        style: const TextStyle(
-                          color: Colors.amberAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: ListView.builder(
+          ],
+        ),
+      ),
+      child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: locations.length,
               itemBuilder: (context, index) {
@@ -253,9 +213,6 @@ class _MapSheetState extends State<MapSheet> {
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

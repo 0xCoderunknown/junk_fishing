@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import '../../models/item.dart';
-import '../../models/player_state.dart';
 import '../../services/game_data_service.dart';
 import '../../utils/item_icon_helper.dart';
+import 'game_bottom_sheet.dart';
 
 class InventorySheet extends StatefulWidget {
-  final PlayerState playerState;
   final GameDataService gameService;
   final VoidCallback onStateChanged;
 
   const InventorySheet({
     super.key,
-    required this.playerState,
     required this.gameService,
     required this.onStateChanged,
   });
@@ -24,76 +22,43 @@ class InventorySheet extends StatefulWidget {
 class _InventorySheetState extends State<InventorySheet> {
   int _selectedFilterRarity = 0; // 0 = all
 
+  Future<void> _handleSellAll() async {
+    final gained = await widget.gameService.sellAllScrap();
+    if (!mounted) return;
+    if (gained > 0) {
+      HapticFeedback.mediumImpact();
+      widget.onStateChanged();
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final inventory = widget.gameService.playerState.inventory;
+    final storageLimit = widget.gameService.playerState.storageLimit;
     final filtered = _selectedFilterRarity == 0
         ? inventory
         : inventory
               .where((item) => item.rarity == _selectedFilterRarity)
               .toList();
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.82,
-      decoration: const BoxDecoration(
-        color: Color(0xFF131720),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    return GameBottomSheet(
+      heightFactor: 0.82,
+      titleIcon: Icons.inventory_2,
+      titleIconColor: Colors.orangeAccent,
+      title: 'Scrap Inventory (${inventory.length}/$storageLimit)',
+      trailing: inventory.isNotEmpty
+          ? TextButton.icon(
+              onPressed: _handleSellAll,
+              icon: const Icon(Icons.sell, size: 16),
+              label: const Text('Sell All'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.amberAccent,
+              ),
+            )
+          : null,
       child: Column(
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Icon(Icons.inventory_2, color: Colors.orangeAccent),
-                const SizedBox(width: 10),
-                Text(
-                  'Scrap Inventory (${inventory.length}/${widget.gameService.playerState.storageLimit})',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                if (inventory.isNotEmpty)
-                  TextButton.icon(
-                    onPressed: () async {
-                      for (final item in List<Item>.from(inventory)) {
-                        await widget.gameService.sellItem(
-                          item,
-                          fromInventory: true,
-                        );
-                      }
-                      widget.onStateChanged();
-                      if (context.mounted) {
-                        setState(() {});
-                      }
-                    },
-                    icon: const Icon(Icons.sell, size: 16),
-                    label: const Text('Sell All'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.amberAccent,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
           // Rarity Filter Pills
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -111,7 +76,7 @@ class _InventorySheetState extends State<InventorySheet> {
           ),
           const SizedBox(height: 12),
 
-          // Grid of Inventory Items
+          // Inventory Grid
           Expanded(
             child: filtered.isEmpty
                 ? Center(
@@ -119,16 +84,15 @@ class _InventorySheetState extends State<InventorySheet> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.inventory_2_outlined,
-                          size: 56,
-                          color: Colors.white.withValues(alpha: 0.2),
+                          Icons.inbox,
+                          size: 48,
+                          color: Colors.white.withValues(alpha: 0.3),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
                         Text(
                           inventory.isEmpty
-                              ? 'Your junk pouch is empty!\nGo cast a line.'
-                              : 'No items match filter.',
-                          textAlign: TextAlign.center,
+                              ? 'Your tackle bag is empty.'
+                              : 'No scrap matching this filter.',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.5),
                           ),
@@ -137,13 +101,13 @@ class _InventorySheetState extends State<InventorySheet> {
                     ),
                   )
                 : GridView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.9,
+                          crossAxisCount: 3,
+                          childAspectRatio: 0.72,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
                         ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
@@ -151,13 +115,13 @@ class _InventorySheetState extends State<InventorySheet> {
                       final rarityColor = getRarityColor(item.rarity);
 
                       return Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E2430),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: rarityColor.withValues(alpha: 0.4),
-                            width: 1.5,
+                            color: rarityColor.withValues(alpha: 0.5),
+                            width: 1.2,
                           ),
                         ),
                         child: Column(
@@ -170,32 +134,32 @@ class _InventorySheetState extends State<InventorySheet> {
                                   item.rarityStars,
                                   style: TextStyle(
                                     color: rarityColor,
-                                    fontSize: 11,
+                                    fontSize: 9,
                                   ),
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
+                                    horizontal: 4,
+                                    vertical: 1,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.black45,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(
-                                        Icons.monetization_on,
-                                        color: Colors.amber,
-                                        size: 12,
+                                      const Text(
+                                        '🪙',
+                                        style: TextStyle(fontSize: 8),
                                       ),
                                       const SizedBox(width: 2),
                                       Text(
                                         '${item.estimatedValue}',
                                         style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 11,
+                                          color: Colors.amberAccent,
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 9,
                                         ),
                                       ),
                                     ],
@@ -232,10 +196,10 @@ class _InventorySheetState extends State<InventorySheet> {
                                     item,
                                     fromInventory: true,
                                   );
+                                  if (!context.mounted) return;
+                                  HapticFeedback.lightImpact();
                                   widget.onStateChanged();
-                                  if (context.mounted) {
-                                    setState(() {});
-                                  }
+                                  setState(() {});
                                 },
                                 style: OutlinedButton.styleFrom(
                                   padding: EdgeInsets.zero,

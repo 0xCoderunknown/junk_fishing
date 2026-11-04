@@ -12,8 +12,6 @@ class CollapsibleNavMenu extends StatelessWidget {
   final Location? currentLocation;
   final ValueChanged<NavAction> onAction;
   final VoidCallback onToggleCollapse;
-  final VoidCallback? onBuyBait;
-  final VoidCallback? onUpgradeStorage;
 
   const CollapsibleNavMenu({
     super.key,
@@ -23,8 +21,6 @@ class CollapsibleNavMenu extends StatelessWidget {
     this.currentLocation,
     required this.onAction,
     required this.onToggleCollapse,
-    this.onBuyBait,
-    this.onUpgradeStorage,
   });
 
   @override

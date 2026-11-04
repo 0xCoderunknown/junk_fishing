@@ -114,9 +114,11 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
         fit: StackFit.expand,
         children: [
           // ── 1. Atmospheric blur overlay ───────────────────────────────────
-          BackdropFilter(
+          RepaintBoundary(
+            child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
             child: Container(color: Colors.black.withValues(alpha: 0.60)),
+          ),
           ),
 
           // ── 2. Centered Timing Visuals ────────────────────────────────────

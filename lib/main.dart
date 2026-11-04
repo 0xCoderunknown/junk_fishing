@@ -9,7 +9,6 @@ void main() {
   // Set immersive orientation and system UI styles for Android gaming
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
   ]);
 
   SystemChrome.setSystemUIOverlayStyle(

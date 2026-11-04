@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/game_data_service.dart';
+import 'game_bottom_sheet.dart';
 
 class SettingsSheet extends StatelessWidget {
   final GameDataService gameService;
@@ -14,42 +15,14 @@ class SettingsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Color(0xFF131720),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return GameBottomSheet(
+      heightFactor: 0.55,
+      titleIcon: Icons.tune,
+      titleIconColor: Colors.tealAccent,
+      title: 'Settings & About',
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Icon(Icons.tune, color: Colors.tealAccent),
-              SizedBox(width: 10),
-              Text(
-                'Settings & About',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.vibration, color: Colors.white70),
@@ -64,7 +37,7 @@ class SettingsSheet extends StatelessWidget {
             trailing: Switch(
               value: true,
               activeThumbColor: Colors.tealAccent,
-              onChanged: (val) {},
+              onChanged: null, // Always enabled
             ),
           ),
           ListTile(
@@ -75,13 +48,13 @@ class SettingsSheet extends StatelessWidget {
               style: TextStyle(color: Colors.white),
             ),
             subtitle: const Text(
-              'Water splash and rod tension audio',
+              'Audio effects (upcoming)',
               style: TextStyle(color: Colors.white54, fontSize: 12),
             ),
             trailing: Switch(
-              value: true,
+              value: false,
               activeThumbColor: Colors.tealAccent,
-              onChanged: (val) {},
+              onChanged: null, // Audio stubbed
             ),
           ),
           const Divider(color: Colors.white12),
@@ -94,7 +67,7 @@ class SettingsSheet extends StatelessWidget {
               style: TextStyle(color: Colors.redAccent),
             ),
             subtitle: const Text(
-              'Restore default 100 coins and 15 bait',
+              'Restore default 150 coins and 20 bait',
               style: TextStyle(color: Colors.white54, fontSize: 12),
             ),
             onTap: () async {
@@ -119,11 +92,9 @@ class SettingsSheet extends StatelessWidget {
                       onPressed: () => Navigator.pop(ctx, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
                       ),
-                      child: const Text(
-                        'Reset',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: const Text('Reset'),
                     ),
                   ],
                 ),
@@ -132,21 +103,22 @@ class SettingsSheet extends StatelessWidget {
               if (confirmed == true) {
                 await gameService.resetPlayerState();
                 onReset();
-                if (context.mounted) Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               }
             },
           ),
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Junk Fishing v1.0.0 • Deterministic Gacha Engine',
+              'Junk Fishing v0.1.2 • AI Built & Maintained',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withValues(alpha: 0.35),
                 fontSize: 11,
               ),
             ),
           ),
-          const SizedBox(height: 12),
         ],
       ),
     );

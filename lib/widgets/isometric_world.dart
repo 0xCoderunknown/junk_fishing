@@ -5,8 +5,8 @@ import '../models/location.dart';
 import '../rendering/scene_painters.dart';
 
 /// Top-down isometric world view composed of modular rendering layers:
-/// - [EnvironmentPainter] (ground, rocks, trees, dirt path)
-/// - [LanternLightingPainter] (lamp post & warm ambient shader)
+/// - [EnvironmentPainter] (ground, rocks, trees, dirt path - static)
+/// - [LanternLightingPainter] (lamp post & warm ambient shader - static)
 /// - [FishingHolePainter] (stone well masonry, water depth, and animated ripples)
 /// - [FishermanPainter] (character, rod flex, and line physics)
 class IsometricWorld extends StatefulWidget {
@@ -77,99 +77,109 @@ class _IsometricWorldState extends State<IsometricWorld>
           widget.location?.waterColor ?? '0xFF1B4965',
         );
 
-        return AnimatedBuilder(
-          animation: _ambientController,
-          builder: (context, child) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                // 1. Environment: Ground & Foliage
-                CustomPaint(
-                  painter: EnvironmentPainter(
-                    holeCenter: holeCenter,
-                    holeRadiusX: holeRadiusX,
-                    holeRadiusY: holeRadiusY,
-                  ),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Environment: Ground & Foliage (Static - cached in RepaintBoundary)
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: EnvironmentPainter(
+                  holeCenter: holeCenter,
+                  holeRadiusX: holeRadiusX,
+                  holeRadiusY: holeRadiusY,
                 ),
+              ),
+            ),
 
-                // 2. Wooden Stand & Glowing Lantern
-                CustomPaint(
-                  painter: LanternLightingPainter(lanternPos: lanternPos),
-                ),
+            // 2. Wooden Stand & Glowing Lantern (Static - cached in RepaintBoundary)
+            RepaintBoundary(
+              child: CustomPaint(
+                painter: LanternLightingPainter(lanternPos: lanternPos),
+              ),
+            ),
 
-                // 3. Stone Fishing Hole & Animated Water
-                CustomPaint(
-                  painter: FishingHolePainter(
-                    center: holeCenter,
-                    rx: holeRadiusX,
-                    ry: holeRadiusY,
-                    waterColor: waterColor,
-                    rippleProgress: _ambientController.value,
-                  ),
-                ),
+            // 3 & 4. Animated Water & Fisherman
+            AnimatedBuilder(
+              animation: _ambientController,
+              builder: (context, child) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // 3. Stone Fishing Hole & Animated Water
+                    CustomPaint(
+                      painter: FishingHolePainter(
+                        center: holeCenter,
+                        rx: holeRadiusX,
+                        ry: holeRadiusY,
+                        waterColor: waterColor,
+                        rippleProgress: _ambientController.value,
+                      ),
+                    ),
 
-                // 4. Fisherman Character & Rod
-                CustomPaint(
-                  painter: FishermanPainter(
-                    pos: fishermanPos,
-                    holeCenter: holeCenter,
-                    holeRadiusY: holeRadiusY,
-                    isPulling: widget.state == FishingState.pullingRod,
-                    animProgress: _ambientController.value,
-                  ),
-                ),
+                    // 4. Fisherman Character & Rod
+                    CustomPaint(
+                      painter: FishermanPainter(
+                        pos: fishermanPos,
+                        holeCenter: holeCenter,
+                        holeRadiusY: holeRadiusY,
+                        isPulling: widget.state == FishingState.pullingRod,
+                        animProgress: _ambientController.value,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
 
-                // 5. Interactive "TAP THE HOLE" Target Prompt
-                if (widget.state == FishingState.readyToCast)
-                  Positioned(
-                    left: holeCenter.dx - holeRadiusX,
-                    top: holeCenter.dy - holeRadiusY,
-                    width: holeRadiusX * 2,
-                    height: holeRadiusY * 2,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: widget.onPondTap,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
+            // 5. Interactive "TAP THE HOLE" Target Prompt
+            if (widget.state == FishingState.readyToCast)
+              Positioned(
+                left: holeCenter.dx - holeRadiusX,
+                top: holeCenter.dy - holeRadiusY,
+                width: holeRadiusX * 2,
+                height: holeRadiusY * 2,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.onPondTap,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.amberAccent,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.touch_app,
+                            color: Colors.amberAccent,
+                            size: 18,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.amberAccent,
-                              width: 1.5,
+                          const SizedBox(width: 6),
+                          Text(
+                            'TAP THE HOLE',
+                            style: TextStyle(
+                              color: Colors.amber.shade200,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.4,
+                              fontSize: 12,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.touch_app,
-                                color: Colors.amberAccent,
-                                size: 18,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'TAP THE HOLE',
-                                style: TextStyle(
-                                  color: Colors.amber.shade200,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.4,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
-              ],
-            );
-          },
+                ),
+              ),
+          ],
         );
       },
     );

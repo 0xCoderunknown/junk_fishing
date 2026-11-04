@@ -51,4 +51,17 @@ class Item {
   }
 
   String get rarityStars => '★' * rarity;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Item &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          rarity == other.rarity &&
+          estimatedValue == other.estimatedValue;
+
+  @override
+  int get hashCode => Object.hash(id, name, rarity, estimatedValue);
 }

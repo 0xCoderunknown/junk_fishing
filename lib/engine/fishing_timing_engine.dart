@@ -1,6 +1,42 @@
 import 'dart:math';
 
-import 'package:flutter/animation.dart';
+// Pure Dart easing curve signature: maps normalized time t in [0.0, 1.0] to curved progress.
+typedef EasingCurve = double Function(double t);
+
+/// Pure Dart mathematical easing functions (zero Flutter UI dependencies).
+class EasingCurves {
+  static double linear(double t) => t;
+
+  /// Equivalent to Curves.easeInOut (smooth polynomial transition)
+  static double easeInOut(double t) {
+    if (t <= 0.0) return 0.0;
+    if (t >= 1.0) return 1.0;
+    return t < 0.5 ? 2.0 * t * t : -1.0 + (4.0 - 2.0 * t) * t;
+  }
+
+  /// Equivalent to Curves.easeIn (starts slow, accelerates into target)
+  static double easeIn(double t) {
+    if (t <= 0.0) return 0.0;
+    if (t >= 1.0) return 1.0;
+    return t * t;
+  }
+
+  /// Equivalent to Curves.easeOut (fast start, decelerates into target)
+  static double easeOut(double t) {
+    if (t <= 0.0) return 0.0;
+    if (t >= 1.0) return 1.0;
+    final f = t - 1.0;
+    return f * f * f + 1.0;
+  }
+
+  /// Equivalent to Curves.decelerate: 1.0 - (1.0 - t)^2
+  static double decelerate(double t) {
+    if (t <= 0.0) return 0.0;
+    if (t >= 1.0) return 1.0;
+    final d = 1.0 - t;
+    return 1.0 - d * d;
+  }
+}
 
 /// Phase types for the Torchlight-style fishing mechanic
 enum TimingPhaseType {
@@ -14,7 +50,7 @@ enum TimingPhaseType {
 class RingPhase {
   final double targetRadius;
   final int durationMs;
-  final Curve curve;
+  final EasingCurve curve;
   final TimingPhaseType type;
 
   RingPhase({
@@ -67,7 +103,7 @@ class FishingTimingEngine {
   // Set to real millisecondsSinceEpoch in _applyPhase before first update.
   int _phaseStartTimeMs = -1;
   int _phaseDurationMs = 1000;
-  Curve _phaseCurve = Curves.easeInOut;
+  EasingCurve _phaseCurve = EasingCurves.easeInOut;
 
   bool _isFinished = false;
 
@@ -182,7 +218,7 @@ class FishingTimingEngine {
           RingPhase(
             targetRadius: target,
             durationMs: durationMs,
-            curve: Curves.easeIn,
+            curve: EasingCurves.easeIn,
             type: TimingPhaseType.strikeContraction,
           ),
         );
@@ -197,7 +233,7 @@ class FishingTimingEngine {
           RingPhase(
             targetRadius: target,
             durationMs: windowMs,
-            curve: Curves.linear,
+            curve: EasingCurves.linear,
             type: TimingPhaseType.strikeWindow,
           ),
         );
@@ -210,7 +246,7 @@ class FishingTimingEngine {
           RingPhase(
             targetRadius: maxOuterRadius,
             durationMs: retreatDuration,
-            curve: Curves.easeOut,
+            curve: EasingCurves.easeOut,
             type: TimingPhaseType.retreat,
           ),
         );
@@ -225,7 +261,7 @@ class FishingTimingEngine {
             RingPhase(
               targetRadius: target,
               durationMs: durationMs,
-              curve: Curves.decelerate,
+              curve: EasingCurves.decelerate,
               type: TimingPhaseType.deepTease,
             ),
           );
@@ -237,7 +273,7 @@ class FishingTimingEngine {
             RingPhase(
               targetRadius: target,
               durationMs: durationMs,
-              curve: Curves.easeInOut,
+              curve: EasingCurves.easeInOut,
               type: TimingPhaseType.teaseNibble,
             ),
           );
@@ -276,7 +312,7 @@ class FishingTimingEngine {
 
     final elapsed = nowMs - _phaseStartTimeMs;
     final progress = (elapsed / _phaseDurationMs).clamp(0.0, 1.0);
-    final curvedProgress = _phaseCurve.transform(progress);
+    final curvedProgress = _phaseCurve(progress);
 
     final prevOrange = isInOrangeStrikeWindow;
     _currentRadius =

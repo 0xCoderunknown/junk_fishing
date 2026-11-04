@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../models/item.dart';
 import '../../services/game_data_service.dart';
+import 'game_bottom_sheet.dart';
 
 class MarketSheet extends StatefulWidget {
   final GameDataService gameService;
@@ -48,17 +48,13 @@ class _MarketSheetState extends State<MarketSheet> {
   }
 
   Future<void> _handleSellAllScrap() async {
-    final inventory = List<Item>.from(widget.gameService.playerState.inventory);
-    if (inventory.isEmpty) return;
-
-    for (final item in inventory) {
-      await widget.gameService.sellItem(item, fromInventory: true);
-    }
-
+    final gained = await widget.gameService.sellAllScrap();
     if (!mounted) return;
-    HapticFeedback.mediumImpact();
-    widget.onStateChanged();
-    setState(() {});
+    if (gained > 0) {
+      HapticFeedback.mediumImpact();
+      widget.onStateChanged();
+      setState(() {});
+    }
   }
 
   @override
@@ -70,56 +66,17 @@ class _MarketSheetState extends State<MarketSheet> {
       (sum, item) => sum + item.estimatedValue,
     );
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Color(0xFF131720),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return GameBottomSheet(
+      heightFactor: 0.85,
+      titleIcon: Icons.storefront,
+      titleIconColor: Colors.amberAccent,
+      title: 'Harbor Market',
+      trailing: IconButton(
+        icon: const Icon(Icons.close, color: Colors.white54),
+        onPressed: () => Navigator.of(context).pop(),
       ),
       child: Column(
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.storefront,
-                  color: Colors.amberAccent,
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  'Harbor Market',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white54),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-
           // Player Balances Capsule
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
