@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Direct Tap-The-Hole Flow & Seamless Re-Cast Loop**:
+  - The game now launches immediately in the `readyToCast` state with the animated **"TAP THE HOLE"** prompt active over the stone well, eliminating the redundant "start game" step.
+  - The collapsible HUD drawer remains accessible on the left while keeping the hole ready to cast.
+  - When a cast finishes (after dismissing a failed comic speech bubble or keeping/selling a catch), the game automatically returns straight to **"TAP THE HOLE"** rather than retreating to an idle menu.
+- **Torchlight-Paced Ring Timing Engine**:
+  - Re-tuned `FishingTimingEngine` speeds and ease curves (`Curves.easeInOutSine` and `Curves.easeInOutQuad`) to match authentic Torchlight gameplay pacing:
+    - Calm, deliberate tease contractions lasting 900ms - 1500ms rather than rapid twitching.
+    - Deep teases smoothly glide near the inner ring (48-56px) without turning orange.
+    - Generous, human-friendly strike linger window (750ms ± 200ms) with an increased strike tolerance (14.0px).
 - **Architectural Separation of Concerns**:
   - Extracted pure Dart game engines into `lib/engine/`:
     - `FishingTimingEngine`: Headless simulation of Torchlight-style timing mechanics, procedural teasing contractions, orange strike windows, tolerance calculations, and precision scoring.

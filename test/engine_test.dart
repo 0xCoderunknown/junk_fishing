@@ -11,7 +11,7 @@ void main() {
       final engine = FishingTimingEngine(difficultyMultiplier: 1.0);
       expect(engine.currentRadius, FishingTimingEngine.maxOuterRadius);
       expect(engine.isFinished, false);
-      expect(engine.strikeTolerance, 12.0);
+      expect(engine.strikeTolerance, 14.0);
     });
 
     test('Premature tap outside orange window fails with 0 accuracy', () {

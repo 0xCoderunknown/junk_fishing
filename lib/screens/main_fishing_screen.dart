@@ -24,8 +24,8 @@ class MainFishingScreen extends StatefulWidget {
 class _MainFishingScreenState extends State<MainFishingScreen> {
   final GameDataService _gameService = GameDataService();
 
-  // State Machine
-  FishingState _fishingState = FishingState.idleMenu;
+  // State Machine: Start directly at readyToCast so player immediately taps the hole!
+  FishingState _fishingState = FishingState.readyToCast;
   bool _menuCollapsed = false;
 
   // Resolve outcome data
@@ -127,12 +127,12 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     });
   }
 
-  /// 5 -> 6: RESULT_POPUP -> RETURN_IDLE
-  void _returnToIdle() {
+  /// When fishing ends: Return directly to [readyToCast] (Tap the Hole)
+  void _returnToReadyToCast() {
     setState(() {
       _caughtItem = null;
       _lastAttemptSucceeded = false;
-      _fishingState = FishingState.idleMenu;
+      _fishingState = FishingState.readyToCast;
     });
   }
 
@@ -145,7 +145,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
         _showSuccessSnackBar('Stored "${_caughtItem!.name}" in inventory!');
       }
     }
-    _returnToIdle();
+    _returnToReadyToCast();
   }
 
   Future<void> _handleSellItem() async {
@@ -153,7 +153,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
       final earned = await _gameService.sellItem(_caughtItem!);
       _showSuccessSnackBar('Sold "${_caughtItem!.name}" for 🪙 $earned scrap coins!');
     }
-    _returnToIdle();
+    _returnToReadyToCast();
   }
 
   // --- Modals & Actions ---
@@ -270,7 +270,8 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     }
 
     final location = _gameService.currentLocation;
-    final isMenuVisible = _fishingState == FishingState.idleMenu;
+    final isMenuVisible = _fishingState == FishingState.idleMenu ||
+        _fishingState == FishingState.readyToCast;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -285,28 +286,6 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
             location: location,
             onPondTap: _initiateCast,
           ),
-
-          // -------------------------------------------------------------
-          // LAYER 2: Back button when in FISHING_READY state
-          // -------------------------------------------------------------
-          if (_fishingState == FishingState.readyToCast)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 12,
-              left: 16,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() => _fishingState = FishingState.idleMenu);
-                },
-                icon: const Icon(Icons.arrow_back, size: 16),
-                label: const Text('CANCEL CAST'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black87,
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
-              ),
-            ),
 
           // -------------------------------------------------------------
           // LAYER 3: Collapsible Left Navigation Menu & Player HUD
@@ -392,7 +371,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
               )
             else
               ComicSpeechBubble(
-                onDismiss: _returnToIdle,
+                onDismiss: _returnToReadyToCast,
               ),
           ],
         ],
