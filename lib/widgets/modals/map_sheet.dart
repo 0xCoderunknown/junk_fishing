@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/game_data_service.dart';
 
-class MapSheet extends StatelessWidget {
+class MapSheet extends StatefulWidget {
   final GameDataService gameService;
   final VoidCallback onLocationSelected;
 
@@ -12,9 +13,17 @@ class MapSheet extends StatelessWidget {
   });
 
   @override
+  State<MapSheet> createState() => _MapSheetState();
+}
+
+class _MapSheetState extends State<MapSheet> {
+  static const int _unlockCost = 350;
+
+  @override
   Widget build(BuildContext context) {
-    final locations = gameService.locations;
-    final currentLocId = gameService.playerState.currentLocationId;
+    final locations = widget.gameService.locations;
+    final currentLocId = widget.gameService.playerState.currentLocationId;
+    final playerMoney = widget.gameService.playerState.money;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.70,
@@ -51,6 +60,29 @@ class MapSheet extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black45,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('🪙 ', style: TextStyle(fontSize: 12)),
+                      Text(
+                        '$playerMoney',
+                        style: const TextStyle(
+                          color: Colors.amberAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -62,6 +94,7 @@ class MapSheet extends StatelessWidget {
               itemBuilder: (context, index) {
                 final loc = locations[index];
                 final isCurrent = loc.id == currentLocId;
+                final isUnlocked = widget.gameService.isLocationUnlocked(loc.id);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -84,8 +117,8 @@ class MapSheet extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          loc.unlocked ? Icons.waves : Icons.lock,
-                          color: loc.unlocked ? Colors.tealAccent : Colors.white38,
+                          isUnlocked ? Icons.waves : Icons.lock,
+                          color: isUnlocked ? Colors.tealAccent : Colors.white38,
                           size: 24,
                         ),
                       ),
@@ -140,11 +173,11 @@ class MapSheet extends StatelessWidget {
                             ),
                           ),
                         )
-                      else if (loc.unlocked)
+                      else if (isUnlocked)
                         ElevatedButton(
                           onPressed: () async {
-                            await gameService.selectLocation(loc.id);
-                            onLocationSelected();
+                            await widget.gameService.selectLocation(loc.id);
+                            widget.onLocationSelected();
                             if (context.mounted) Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
@@ -156,9 +189,30 @@ class MapSheet extends StatelessWidget {
                           child: const Text('TRAVEL', style: TextStyle(fontSize: 11)),
                         )
                       else
-                        const Text(
-                          'LOCKED',
-                          style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+                        ElevatedButton(
+                          onPressed: playerMoney >= _unlockCost
+                              ? () async {
+                                  final success = await widget.gameService
+                                      .unlockLocation(loc.id, cost: _unlockCost);
+                                  if (success) {
+                                    HapticFeedback.mediumImpact();
+                                    setState(() {});
+                                    widget.onLocationSelected();
+                                  }
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber.shade700,
+                            foregroundColor: Colors.black,
+                            disabledBackgroundColor: Colors.white10,
+                            disabledForegroundColor: Colors.white38,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(
+                            '🪙 $_unlockCost',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
                         ),
                     ],
                   ),

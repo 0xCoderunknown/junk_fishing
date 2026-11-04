@@ -70,11 +70,13 @@ void main() {
 
     test('PlayerState storage, bait, and copyWith', () {
       final player = PlayerState.initial();
-      expect(player.money, 100);
-      expect(player.baitCount, 15);
+      expect(player.money, 150);
+      expect(player.baitCount, 20);
       expect(player.storageLimit, 20);
       expect(player.canFish, true);
       expect(player.hasStorageSpace, true);
+      expect(player.unlockedLocationIds.contains('loc_rusty_dock'), true);
+      expect(player.unlockedLocationIds.contains('loc_neon_canal'), true);
 
       // Inventory full condition
       final fullInventory = List.generate(

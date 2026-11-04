@@ -44,10 +44,27 @@ void main() {
       expect(engine.currentPhase?.type, TimingPhaseType.strikeWindow);
       expect(engine.currentPhase?.durationMs, inInclusiveRange(400, 650));
 
-      // Tapping during orange window guarantees catch
-      final tapResult = engine.registerTap();
+      // Tapping during orange window guarantees catch with graded accuracy
+      final tapResult = engine.registerTap(simulatedTime);
       expect(tapResult.success, true);
-      expect(tapResult.accuracy, 1.0);
+      expect(tapResult.accuracy, inInclusiveRange(0.65, 1.0));
+    });
+
+    test('Strike window tap accuracy awards 1.0 at center and lower at edge', () {
+      final engine = FishingTimingEngine();
+      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+
+      for (int i = 0; i < 200; i++) {
+        simulatedTime += 40;
+        engine.update(simulatedTime);
+        if (engine.isInOrangeStrikeWindow) break;
+      }
+
+      final windowDuration = engine.currentPhase!.durationMs;
+      final centerTime = simulatedTime + (windowDuration ~/ 2);
+      final centerResult = engine.registerTap(centerTime);
+      expect(centerResult.success, true);
+      expect(centerResult.accuracy, closeTo(1.0, 0.05));
     });
 
     test('Engine updates radius over time and recycles cycle without finish', () {

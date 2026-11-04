@@ -88,34 +88,68 @@ class FishingTimingEngine {
 
     // Mind-game waypoint paths:
     // Anchors:
-    // - Big: 128.0 - 135.0
-    // - Medium: 78.0 - 92.0
-    // - Small: 55.0
+    // - Big: ~125.0 - 135.0
+    // - Medium: ~78.0 - 92.0
+    // - Small: ~55.0
     // - Small almost orange: 42.0 (inner ring is 38.0, gets within 4px but NO orange!)
     // - Strike: innerRingRadius (38.0)
     final patternIndex = _rng.nextInt(5);
+    double j() => _rng.nextDouble() * 8.0 - 4.0; // ±4px natural jitter
+
     List<double> waypoints;
     switch (patternIndex) {
       case 0:
         // Big -> Medium -> Big -> Small Almost Orange (tease!) -> Medium -> Strike!
-        waypoints = [85.0, 130.0, 42.0, 85.0, innerRingRadius];
+        waypoints = [
+          85.0 + j(),
+          (130.0 + j()).clamp(120.0, maxOuterRadius),
+          42.0 + (_rng.nextDouble() * 2.5),
+          85.0 + j(),
+          innerRingRadius
+        ];
         break;
       case 1:
         // Big -> Small -> Medium -> Big -> Small Almost Orange -> Medium -> Strike!
-        waypoints = [55.0, 92.0, 132.0, 43.0, 80.0, innerRingRadius];
+        waypoints = [
+          55.0 + j(),
+          88.0 + j(),
+          (132.0 + j()).clamp(120.0, maxOuterRadius),
+          43.0 + (_rng.nextDouble() * 2.0),
+          80.0 + j(),
+          innerRingRadius
+        ];
         break;
       case 2:
         // Big -> Medium -> Small Almost Orange -> Big -> Medium -> Strike!
-        waypoints = [80.0, 42.0, 128.0, 85.0, innerRingRadius];
+        waypoints = [
+          80.0 + j(),
+          42.0 + (_rng.nextDouble() * 2.0),
+          (128.0 + j()).clamp(120.0, maxOuterRadius),
+          85.0 + j(),
+          innerRingRadius
+        ];
         break;
       case 3:
         // Big -> Small Almost Orange (swift deep dive!) -> Big -> Medium -> Strike!
-        waypoints = [42.0, 135.0, 85.0, innerRingRadius];
+        waypoints = [
+          42.0 + (_rng.nextDouble() * 2.5),
+          (133.0 + j()).clamp(120.0, maxOuterRadius),
+          85.0 + j(),
+          innerRingRadius
+        ];
         break;
       case 4:
       default:
         // Big -> Medium -> Big -> Medium -> Small Almost Orange -> Medium -> Strike!
-        waypoints = [88.0, 125.0, 78.0, 132.0, 42.0, 82.0, innerRingRadius];
+        waypoints = [
+          88.0 + j(),
+          (125.0 + j()).clamp(118.0, maxOuterRadius),
+          78.0 + j(),
+          (132.0 + j()).clamp(120.0, maxOuterRadius),
+          42.0 + (_rng.nextDouble() * 2.5),
+          82.0 + j(),
+          innerRingRadius
+        ];
         break;
     }
 
@@ -211,15 +245,28 @@ class FishingTimingEngine {
   }
 
   /// Resolves a player tap.
-  /// Returns a record with `success` and `accuracy` [0.0, 1.0].
-  ({bool success, double accuracy}) registerTap() {
+  /// Returns a record with `success` and graded `accuracy` [0.65 - 1.0] based
+  /// on timing precision within the orange bite window.
+  ({bool success, double accuracy}) registerTap([int? tapTimeMs]) {
     if (_isFinished) return (success: false, accuracy: 0.0);
 
     final wasOrange = isInOrangeStrikeWindow;
     _isFinished = true;
 
     if (wasOrange) {
-      return (success: true, accuracy: 1.0);
+      final now = tapTimeMs ?? DateTime.now().millisecondsSinceEpoch;
+      final elapsedInStrike =
+          (now - _phaseStartTimeMs).clamp(0, _phaseDurationMs);
+      final progress =
+          _phaseDurationMs > 0 ? elapsedInStrike / _phaseDurationMs : 0.5;
+
+      // Peak accuracy (1.0) is centered in the bite window.
+      // Tapping near either edge grants ~0.65 - 0.70 accuracy.
+      final distanceFromCenter = (progress - 0.5).abs() * 2.0; // 0.0 at center, 1.0 at edges
+      final calculatedAccuracy =
+          (1.0 - (distanceFromCenter * 0.35)).clamp(0.65, 1.0);
+
+      return (success: true, accuracy: calculatedAccuracy);
     } else {
       // Tap outside strike window = premature strike fail
       return (success: false, accuracy: 0.0);

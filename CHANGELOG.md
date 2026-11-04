@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-04
 
 ### Changed
+- **Precision Timing Accuracy Gradient**:
+  - Replaced flat binary accuracy (1.0) with an authentic reaction gradient: tapping dead-center in the 500ms orange strike window awards maximum 1.0 (100%) accuracy, while early or late edge taps award a graded ~0.65–0.75 accuracy.
+  - Graded accuracy feeds directly into `LootEngine.rollCatch(timingBonus: accuracy)` to scale high-rarity loot odds and is displayed in the reeling HUD banner.
+- **Waypoint Anchor Radius Jitter**:
+  - Added ±4px natural radius jitter to the mind-game waypoint anchors in `FishingTimingEngine`, ensuring no two fishing cycles traverse identical coordinates while strictly preserving the ~82 px/sec constant velocity.
+- **Early-Game Economy Rebalance**:
+  - Raised baseline sell values for ★ junk items (e.g., Soggy Homework, USB Drive, Croc) to 24–35 coins (up from 8–22) so common catches are always net-profitable against the 10-coin bait cost.
+  - Increased starting player resources in `PlayerState` to 🪙150 (up from 100) and 20 bait (up from 15).
+- **First Discovery vs Duplicate Polaroid Distinction**:
+  - `PolaroidResultCard` now inspects discovery status: true first-time discoveries trigger the glowing amber `"✨ NEW DISCOVERY!"` badge, whereas duplicate catches display a subtle `"LOGGED JUNK (DUPLICATE)"` scrapbook tag.
+- **In-Game Location Unlocking**:
+  - Added `unlockedLocationIds` persistence to `PlayerState` and `unlockLocation` API to `GameDataService`.
+  - `MapSheet` now features interactive travel and unlock controls, allowing players to unlock locked zones (e.g. *Abyssal Tech Trench*) for 🪙350 with live coin check and haptic feedback.
 - **Default Closed Navigation Menu**:
   - The left drawer menu is now in the closed position (`_menuCollapsed = true`) by default on launch, ensuring a clean, distraction-free view of the fishing hole while keeping the toggle tab accessible on the edge.
 - **Enlarged & Polished Top HUD Bar**:

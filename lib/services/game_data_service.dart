@@ -114,9 +114,32 @@ class GameDataService {
   Location? getLocationById(String id) => _locationMap[id];
   Collection? getCollectionById(String id) => _collectionMap[id];
 
+  /// Checks if a location is unlocked for the player.
+  bool isLocationUnlocked(String locationId) {
+    if (_playerState.unlockedLocationIds.contains(locationId)) return true;
+    return _locationMap[locationId]?.unlocked ?? false;
+  }
+
+  /// Unlock a location by paying coins.
+  Future<bool> unlockLocation(String locationId, {int cost = 350}) async {
+    if (_playerState.money < cost) return false;
+    if (isLocationUnlocked(locationId)) return true;
+
+    final updatedUnlocked = Set<String>.from(_playerState.unlockedLocationIds)
+      ..add(locationId);
+
+    _playerState = _playerState.copyWith(
+      money: _playerState.money - cost,
+      unlockedLocationIds: updatedUnlocked,
+    );
+
+    await _savePlayerState();
+    return true;
+  }
+
   /// Set the active fishing location.
   Future<void> selectLocation(String locationId) async {
-    if (_locationMap.containsKey(locationId)) {
+    if (_locationMap.containsKey(locationId) && isLocationUnlocked(locationId)) {
       _playerState = _playerState.copyWith(currentLocationId: locationId);
       await _savePlayerState();
     }

@@ -33,6 +33,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
   bool _lastAttemptSucceeded = false;
   double _lastTimingAccuracy = 0.0;
   Item? _caughtItem;
+  bool _isFirstDiscovery = false;
 
   @override
   void initState() {
@@ -109,9 +110,12 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     if (success) {
       HapticFeedback.mediumImpact();
       _caughtItem = _gameService.rollCatch(timingBonus: accuracy);
+      _isFirstDiscovery = _caughtItem != null &&
+          !_gameService.playerState.discoveredItemIds.contains(_caughtItem!.id);
     } else {
       HapticFeedback.heavyImpact();
       _caughtItem = null;
+      _isFirstDiscovery = false;
     }
 
     // Unblur and trigger 1.5s rod pull animation
@@ -133,6 +137,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     setState(() {
       _caughtItem = null;
       _lastAttemptSucceeded = false;
+      _isFirstDiscovery = false;
       _fishingState = FishingState.readyToCast;
     });
   }
@@ -347,6 +352,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
               PolaroidResultCard(
                 item: _caughtItem!,
                 location: location,
+                isFirstDiscovery: _isFirstDiscovery,
                 onKeep: _handleKeepItem,
                 onSell: _handleSellItem,
               )

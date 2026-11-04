@@ -9,6 +9,7 @@ import '../utils/item_icon_helper.dart';
 class PolaroidResultCard extends StatefulWidget {
   final Item item;
   final Location? location;
+  final bool isFirstDiscovery;
   final VoidCallback onKeep;
   final VoidCallback onSell;
 
@@ -16,6 +17,7 @@ class PolaroidResultCard extends StatefulWidget {
     super.key,
     required this.item,
     required this.location,
+    this.isFirstDiscovery = true,
     required this.onKeep,
     required this.onSell,
   });
@@ -105,37 +107,63 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Discovery Banner Tag
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.amberAccent,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black45,
-                              blurRadius: 8,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.auto_awesome, color: Colors.black87, size: 16),
-                            SizedBox(width: 6),
-                            Text(
-                              'NEW DISCOVERY!',
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13,
-                                letterSpacing: 1.5,
+                      // Discovery Banner Tag (First Find vs Duplicate)
+                      if (widget.isFirstDiscovery)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.amberAccent,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black45,
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.auto_awesome, color: Colors.black87, size: 16),
+                              SizedBox(width: 6),
+                              Text(
+                                'NEW DISCOVERY!',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 13,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white12,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 14),
+                              SizedBox(width: 6),
+                              Text(
+                                'LOGGED JUNK (DUPLICATE)',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 12),
 
                       // Printable / Shareable Polaroid Frame
