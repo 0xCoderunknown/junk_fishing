@@ -204,14 +204,6 @@ class CollectionsSheet extends StatelessWidget {
                             onPressed: () async {
                               await gameService.claimCollectionReward(col.id);
                               onStateChanged();
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Claimed 🪙 ${col.rewardMoney} reward for "${col.name}"!'),
-                                    backgroundColor: Colors.amber.shade800,
-                                  ),
-                                );
-                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.amberAccent,

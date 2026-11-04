@@ -70,19 +70,12 @@ class _InventorySheetState extends State<InventorySheet> {
                 if (inventory.isNotEmpty)
                   TextButton.icon(
                     onPressed: () async {
-                      int totalGained = 0;
                       for (final item in List<Item>.from(inventory)) {
-                        totalGained += await widget.gameService.sellItem(item, fromInventory: true);
+                        await widget.gameService.sellItem(item, fromInventory: true);
                       }
                       widget.onStateChanged();
                       if (context.mounted) {
                         setState(() {});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Sold all scrap for 🪙 $totalGained coins!'),
-                            backgroundColor: Colors.teal,
-                          ),
-                        );
                       }
                     },
                     icon: const Icon(Icons.sell, size: 16),
@@ -203,16 +196,10 @@ class _InventorySheetState extends State<InventorySheet> {
                               height: 28,
                               child: OutlinedButton(
                                 onPressed: () async {
-                                  final earned = await widget.gameService.sellItem(item, fromInventory: true);
+                                  await widget.gameService.sellItem(item, fromInventory: true);
                                   widget.onStateChanged();
                                   if (context.mounted) {
                                     setState(() {});
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Sold "${item.name}" for 🪙 $earned!'),
-                                        duration: const Duration(seconds: 1),
-                                      ),
-                                    );
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(

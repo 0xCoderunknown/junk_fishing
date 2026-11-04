@@ -44,16 +44,16 @@ class CollapsibleNavMenu extends StatelessWidget {
           right: 16,
           child: Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.82),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white24),
+                color: Colors.black.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white24, width: 1.5),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black45,
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
+                    color: Colors.black54,
+                    blurRadius: 14,
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
@@ -70,7 +70,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                       label: '${playerState.money}',
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
 
                   // Inventory -> tap opens Inventory
                   GestureDetector(
@@ -83,7 +83,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                           '${playerState.inventory.length}/${playerState.storageLimit}',
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
 
                   // Bait -> tap opens Market
                   GestureDetector(
@@ -271,27 +271,28 @@ class CollapsibleNavMenu extends StatelessWidget {
     IconData? actionIcon,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: iconColor, size: 14),
-          const SizedBox(width: 4),
+          Icon(icon, color: iconColor, size: 18),
+          const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+              letterSpacing: 0.5,
             ),
           ),
           if (actionIcon != null) ...[
             const SizedBox(width: 4),
-            Icon(actionIcon, color: iconColor, size: 12),
+            Icon(actionIcon, color: iconColor, size: 14),
           ],
         ],
       ),

@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-04
 
 ### Changed
+- **Default Closed Navigation Menu**:
+  - The left drawer menu is now in the closed position (`_menuCollapsed = true`) by default on launch, ensuring a clean, distraction-free view of the fishing hole while keeping the toggle tab accessible on the edge.
+- **Enlarged & Polished Top HUD Bar**:
+  - Increased the top HUD capsule padding (16px horizontal, 8px vertical) and chip padding (10px horizontal, 5px vertical).
+  - Scaled stat icons from 14px to 18px and value typography to 13px `FontWeight.w800` for significantly better readability and one-handed touch ergonomics.
+- **Removed All Intrusive SnackBars**:
+  - Completely removed all floating `SnackBar` popups across the core game loop (`MainFishingScreen`), market modal, inventory sheet, collections sheet, and Polaroid card.
+  - Kept/sold items, purchases, and out-of-bait warnings now update state immediately with tactile haptic feedback and seamless modal transitions without blocking screen space.
 - **Smooth, Constant-Speed Mind Games Ring Animation**:
   - Rebuilt the timing motion in `FishingTimingEngine` to eliminate all stuttering, erratic twitches, lag, and artificial freeze-pauses:
     - Ring expands and contracts at the exact same constant linear velocity (`Curves.linear`, ~82 px/sec) in both directions.

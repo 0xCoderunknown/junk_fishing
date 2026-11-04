@@ -79,15 +79,8 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
           ),
         );
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not share snapshot: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
+    } catch (_) {
+      // Sharing cancelled or unavailable
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }

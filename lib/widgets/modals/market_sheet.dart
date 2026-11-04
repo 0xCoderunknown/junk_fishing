@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/item.dart';
 import '../../services/game_data_service.dart';
 
@@ -22,23 +23,9 @@ class _MarketSheetState extends State<MarketSheet> {
     if (!mounted) return;
 
     if (success) {
+      HapticFeedback.lightImpact();
       widget.onStateChanged();
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Purchased $amount bait for 🪙 $cost!'),
-          backgroundColor: const Color(0xFF2A9D8F),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Need 🪙 $cost coins to purchase $amount bait.'),
-          backgroundColor: Colors.redAccent.shade700,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     }
   }
 
@@ -50,25 +37,9 @@ class _MarketSheetState extends State<MarketSheet> {
     if (!mounted) return;
 
     if (success) {
+      HapticFeedback.lightImpact();
       widget.onStateChanged();
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Backpack upgraded to ${widget.gameService.playerState.storageLimit} slots!',
-          ),
-          backgroundColor: const Color(0xFF2A9D8F),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Need 🪙 $cost coins to expand storage.'),
-          backgroundColor: Colors.redAccent.shade700,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
     }
   }
 
@@ -76,21 +47,14 @@ class _MarketSheetState extends State<MarketSheet> {
     final inventory = List<Item>.from(widget.gameService.playerState.inventory);
     if (inventory.isEmpty) return;
 
-    int totalGained = 0;
     for (final item in inventory) {
-      totalGained += await widget.gameService.sellItem(item, fromInventory: true);
+      await widget.gameService.sellItem(item, fromInventory: true);
     }
 
     if (!mounted) return;
+    HapticFeedback.mediumImpact();
     widget.onStateChanged();
     setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Sold all scrap for 🪙 $totalGained coins!'),
-        backgroundColor: Colors.teal,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override

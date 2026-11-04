@@ -27,7 +27,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
 
   // State Machine: Start directly at readyToCast so player immediately taps the hole!
   FishingState _fishingState = FishingState.readyToCast;
-  bool _menuCollapsed = false;
+  bool _menuCollapsed = true;
 
   // Resolve outcome data
   bool _lastAttemptSucceeded = false;
@@ -72,12 +72,9 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
 
   /// 1 -> 2: IDLE_MENU -> FISHING_READY
   void _startFishingPreparation() {
-    if (!_gameService.playerState.hasStorageSpace) {
-      _showWarningSnackBar('Inventory is full! Sell some scrap first.');
-      return;
-    }
-    if (_gameService.playerState.baitCount <= 0) {
-      _showWarningSnackBar('Out of bait! Purchase more bait in the HUD.');
+    if (!_gameService.playerState.hasStorageSpace ||
+        _gameService.playerState.baitCount <= 0) {
+      _showMarketModal();
       return;
     }
 
@@ -92,8 +89,8 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
 
     final consumed = await _gameService.consumeBait();
     if (!consumed) {
-      _showWarningSnackBar('No bait available!');
-      setState(() => _fishingState = FishingState.idleMenu);
+      HapticFeedback.lightImpact();
+      _showMarketModal();
       return;
     }
 
@@ -142,20 +139,14 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
 
   Future<void> _handleKeepItem() async {
     if (_caughtItem != null) {
-      final success = await _gameService.keepCaughtItem(_caughtItem!);
-      if (!success) {
-        _showWarningSnackBar('Bag is full! Item discarded.');
-      } else {
-        _showSuccessSnackBar('Stored "${_caughtItem!.name}" in inventory!');
-      }
+      await _gameService.keepCaughtItem(_caughtItem!);
     }
     _returnToReadyToCast();
   }
 
   Future<void> _handleSellItem() async {
     if (_caughtItem != null) {
-      final earned = await _gameService.sellItem(_caughtItem!);
-      _showSuccessSnackBar('Sold "${_caughtItem!.name}" for 🪙 $earned scrap coins!');
+      await _gameService.sellItem(_caughtItem!);
     }
     _returnToReadyToCast();
   }
@@ -225,43 +216,17 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
   Future<void> _buyBait() async {
     final success = await _gameService.buyBait(amount: 5, cost: 50);
     if (success) {
-      _showSuccessSnackBar('Purchased 5 bait for 🪙 50!');
+      HapticFeedback.lightImpact();
       setState(() {});
-    } else {
-      _showWarningSnackBar('Need 🪙 50 coins to buy bait.');
     }
   }
 
   Future<void> _upgradeStorage() async {
     final success = await _gameService.upgradeStorage(extraSlots: 5, cost: 150);
     if (success) {
-      _showSuccessSnackBar('Storage expanded to ${_gameService.playerState.storageLimit} slots!');
+      HapticFeedback.lightImpact();
       setState(() {});
-    } else {
-      _showWarningSnackBar('Need 🪙 150 coins to expand storage.');
     }
-  }
-
-  void _showWarningSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent.shade700,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showSuccessSnackBar(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF2A9D8F),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override
