@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-04
 
 ### Changed
+- **Smooth, Constant-Speed Mind Games Ring Animation**:
+  - Rebuilt the timing motion in `FishingTimingEngine` to eliminate all stuttering, erratic twitches, lag, and artificial freeze-pauses:
+    - Ring expands and contracts at the exact same constant linear velocity (`Curves.linear`, ~82 px/sec) in both directions.
+    - Implemented psychological mind-game paths where the ring smoothly transitions between small, medium, and big, and dives close to the inner circle (42px — 4px away from the hook) without turning orange before flowing back out.
+    - Locks at 38px and turns fiery orange for ~500ms on genuine strikes, guaranteeing 100% catch on tap. If missed, smoothly retreats at the exact same constant speed without game over.
+- **Streamlined Top Bar HUD (Cash, Inventory, Bait Only)**:
+  - Removed the location badge ("Rusty Scrapyard Pier") entirely from the top bar.
+  - Centered a clean stats capsule displaying only Cash (`🪙`), Inventory (`🎒`), and Bait (`🪱`).
+  - Directs players to the dedicated Market screen on tap for refilling bait, expanding storage, or trading.
+- **Added Harbor Market Screen (`MarketSheet`)**:
+  - Introduced `MarketSheet` bottom modal and added `NavAction.market` to the collapsible navigation menu.
+  - Features tiered bait purchases with bulk discounts (Starter Worms, Angler Bundle, Commercial Cask).
+  - Features backpack upgrades to expand tackle inventory slots (+5 and +15 expansions).
+  - Features integrated Scrap Pawn Dealer to quickly sell all caught junk for instant coins.
 - **Unpredictable, Non-Rhythmic Fishing Motion Engine**:
   - Upgraded `FishingTimingEngine` to eliminate rhythmic metronome oscillations and deliver organic, unpredictable fish behavior:
     - Procedurally generates 2–4 randomized teaser actions before every strike: jittery micro-twitches (180ms–260ms), slow creeping crawls (900ms–1800ms), wandering drifts, and deceptive fake-outs that surge down to 46px–60px, freeze on the brink of the hook, and suddenly bolt back out.

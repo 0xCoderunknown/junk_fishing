@@ -3,11 +3,11 @@ import 'package:flutter/animation.dart';
 
 /// Phase types for the Torchlight-style fishing mechanic
 enum TimingPhaseType {
-  teaseNibble,       // Fast twitch, quiver, or subtle ripple
-  deepTease,         // Aggressive fake-out that surges near the hook then retreats
-  strikeContraction, // Decisive rush toward center ring
+  teaseNibble,       // Smooth glide between medium and big/small
+  deepTease,         // Deep mind-game contraction almost touching orange (42px) without triggering orange
+  strikeContraction, // Smooth continuous contraction down to inner circle (38px)
   strikeWindow,      // Rings meet! Turns fiery ORANGE - player strikes now!
-  retreat,           // Player missed window - ring smoothly opens back up
+  retreat,           // Player missed window - ring smoothly opens back up at constant speed
 }
 
 class RingPhase {
@@ -28,16 +28,18 @@ class RingPhase {
 
 /// Pure Dart fishing timing simulation engine.
 ///
-/// Unpredictable Torchlight-Style Fishing Dynamics:
-/// - A central hook sits inside a fixed inner ring (radius: 38px).
-/// - Dynamic outer ring moves unpredictably with varied speeds, deceptive fake-outs,
-///   micro-nibbles, creeping crawls, and variable pauses.
-/// - When a strike occurs:
-///   1. `strikeContraction`: The ring closes in rapidly toward the inner ring.
-///   2. `strikeWindow`: The ring contacts the inner circle and turns fiery ORANGE!
-///      The orange window lasts ~500ms (halved for a snappy, authentic bite reaction).
-///      Any tap while orange guarantees a successful catch (100% accuracy).
-///   3. If missed, ring retreats outward smoothly and generates a new unpredictable cycle.
+/// Smooth Constant-Speed Mind Games Mechanics:
+/// - Fixed inner ring at 38px.
+/// - Dynamic outer ring moves at a completely uniform, constant speed:
+///   - Expands and contracts at the EXACT same velocity.
+///   - No erratic speedups, slowdowns, lag, or pauses.
+///   - Goes from small to medium, big, medium, and can dive close to the inner ring (42px)
+///     playing mind games with the player, then smoothly expands back out without turning orange.
+/// - When a genuine strike occurs:
+///   1. Smoothly closes down to 38px at the same speed.
+///   2. Locks at 38px and turns fiery ORANGE for ~500ms.
+///   3. Any tap while orange guarantees a catch (100% accuracy).
+///   4. If missed, smoothly retreats back to max outer radius at the same speed and generates a new cycle.
 class FishingTimingEngine {
   final double difficultyMultiplier;
   final Random _rng;
@@ -54,7 +56,7 @@ class FishingTimingEngine {
   double _targetRadius = maxOuterRadius;
   int _phaseStartTimeMs = 0;
   int _phaseDurationMs = 1000;
-  Curve _phaseCurve = Curves.easeInOut;
+  Curve _phaseCurve = Curves.linear;
 
   bool _isFinished = false;
 
@@ -77,118 +79,96 @@ class FishingTimingEngine {
     return currentPhase!.isOrangeStrike;
   }
 
-  /// Generates an unpredictable, non-rhythmic sequence of behaviors followed by a bite.
+  /// Generates a smooth, constant-speed sequence of mind-game movements followed by a strike.
   void generateCycle([int? nowMs]) {
     _phases = [];
-    final diff = difficultyMultiplier.clamp(0.5, 2.5);
+    final diff = difficultyMultiplier.clamp(0.8, 1.5);
+    // Constant speed in pixels per millisecond (~82 px/sec)
+    final speedPxPerMs = 0.082 * diff;
 
-    // Unpredictable teaser count: 2 to 4 erratic actions
-    final teaserCount = 2 + _rng.nextInt(3);
-
-    for (int i = 0; i < teaserCount; i++) {
-      // Random action:
-      // 0: Fast micro-twitch / nervous nibble
-      // 1: High-tension fake-out (surges close, stalls, retreats)
-      // 2: Hesitant creep (slow, tense contraction)
-      // 3: Wandering drift (floats outward)
-      final action = _rng.nextInt(4);
-
-      if (action == 0) {
-        // Fast nervous micro-twitch
-        final twitchIn = (_currentRadius - (15.0 + _rng.nextDouble() * 20.0))
-            .clamp(innerRingRadius + 20.0, maxOuterRadius);
-        _phases.add(RingPhase(
-          targetRadius: twitchIn,
-          durationMs: (180 + _rng.nextInt(120)),
-          curve: Curves.easeOutQuad,
-          type: TimingPhaseType.teaseNibble,
-        ));
-        // Momentary jitter hesitation
-        _phases.add(RingPhase(
-          targetRadius: twitchIn,
-          durationMs: (100 + _rng.nextInt(150)),
-          curve: Curves.linear,
-          type: TimingPhaseType.teaseNibble,
-        ));
-      } else if (action == 1) {
-        // High-tension fake-out: plunges near inner ring, freezes, then bolts back out!
-        final fakeTarget = innerRingRadius + 8.0 + _rng.nextDouble() * 14.0; // 46-60px
-        final surgeDuration = ((380 + _rng.nextInt(220)) / diff).round();
-        _phases.add(RingPhase(
-          targetRadius: fakeTarget,
-          durationMs: surgeDuration.clamp(320, 700),
-          curve: Curves.fastOutSlowIn,
-          type: TimingPhaseType.deepTease,
-        ));
-        // Teasing freeze right next to the ring (makes player tense)
-        _phases.add(RingPhase(
-          targetRadius: fakeTarget,
-          durationMs: 220 + _rng.nextInt(200),
-          curve: Curves.linear,
-          type: TimingPhaseType.deepTease,
-        ));
-        // Abrupt escape back outwards
-        final reboundRadius =
-            min(maxOuterRadius, fakeTarget + 45.0 + _rng.nextDouble() * 40.0);
-        final reboundDuration = ((450 + _rng.nextInt(250)) / diff).round();
-        _phases.add(RingPhase(
-          targetRadius: reboundRadius,
-          durationMs: reboundDuration.clamp(420, 800),
-          curve: Curves.easeOutCubic,
-          type: TimingPhaseType.teaseNibble,
-        ));
-      } else if (action == 2) {
-        // Hesitant creep: slow, cautious contraction
-        final creepTarget = innerRingRadius + 25.0 + _rng.nextDouble() * 30.0;
-        final creepDuration = ((1200 + _rng.nextInt(500)) / diff).round();
-        _phases.add(RingPhase(
-          targetRadius: creepTarget,
-          durationMs: creepDuration.clamp(900, 1800),
-          curve: Curves.easeInOutCubic,
-          type: TimingPhaseType.teaseNibble,
-        ));
-      } else {
-        // Wandering drift: floating outward
-        final driftRadius =
-            min(maxOuterRadius, innerRingRadius + 45.0 + _rng.nextDouble() * 50.0);
-        final driftDuration = ((800 + _rng.nextInt(350)) / diff).round();
-        _phases.add(RingPhase(
-          targetRadius: driftRadius,
-          durationMs: driftDuration.clamp(700, 1300),
-          curve: Curves.easeInOutSine,
-          type: TimingPhaseType.teaseNibble,
-        ));
-      }
+    // Mind-game waypoint paths:
+    // Anchors:
+    // - Big: 128.0 - 135.0
+    // - Medium: 78.0 - 92.0
+    // - Small: 55.0
+    // - Small almost orange: 42.0 (inner ring is 38.0, gets within 4px but NO orange!)
+    // - Strike: innerRingRadius (38.0)
+    final patternIndex = _rng.nextInt(5);
+    List<double> waypoints;
+    switch (patternIndex) {
+      case 0:
+        // Big -> Medium -> Big -> Small Almost Orange (tease!) -> Medium -> Strike!
+        waypoints = [85.0, 130.0, 42.0, 85.0, innerRingRadius];
+        break;
+      case 1:
+        // Big -> Small -> Medium -> Big -> Small Almost Orange -> Medium -> Strike!
+        waypoints = [55.0, 92.0, 132.0, 43.0, 80.0, innerRingRadius];
+        break;
+      case 2:
+        // Big -> Medium -> Small Almost Orange -> Big -> Medium -> Strike!
+        waypoints = [80.0, 42.0, 128.0, 85.0, innerRingRadius];
+        break;
+      case 3:
+        // Big -> Small Almost Orange (swift deep dive!) -> Big -> Medium -> Strike!
+        waypoints = [42.0, 135.0, 85.0, innerRingRadius];
+        break;
+      case 4:
+      default:
+        // Big -> Medium -> Big -> Medium -> Small Almost Orange -> Medium -> Strike!
+        waypoints = [88.0, 125.0, 78.0, 132.0, 42.0, 82.0, innerRingRadius];
+        break;
     }
 
-    // STRIKE CONTRACTION: Ring closes down swiftly to inner ring (38px)
-    final strikeDuration = ((550 + _rng.nextInt(250)) / diff).round();
-    _phases.add(RingPhase(
-      targetRadius: innerRingRadius,
-      durationMs: strikeDuration.clamp(450, 900),
-      curve: Curves.easeInOutQuad,
-      type: TimingPhaseType.strikeContraction,
-    ));
+    double current = _currentRadius;
+    for (int i = 0; i < waypoints.length; i++) {
+      final target = waypoints[i];
+      final isLastStrike = (i == waypoints.length - 1);
+      final dist = (target - current).abs();
+      // Constant linear duration strictly proportional to distance traveled
+      final durationMs = (dist / speedPxPerMs).round().clamp(80, 3000);
 
-    // STRIKE WINDOW: Hits inner ring and turns fiery ORANGE!
-    // Halved from ~1100ms down to ~500ms (500ms - 550ms)
-    final windowMs = ((500 + _rng.nextInt(50)) / diff).round().clamp(400, 650);
-    _phases.add(RingPhase(
-      targetRadius: innerRingRadius,
-      durationMs: windowMs,
-      curve: Curves.linear,
-      type: TimingPhaseType.strikeWindow,
-    ));
+      if (isLastStrike) {
+        // Strike Contraction: Moving smoothly to 38px at the exact same constant speed
+        _phases.add(RingPhase(
+          targetRadius: target,
+          durationMs: durationMs,
+          curve: Curves.linear,
+          type: TimingPhaseType.strikeContraction,
+        ));
 
-    // RETREAT: Player missed the bite, fish releases hook and swims back out
-    final retreatRadius = maxOuterRadius - (_rng.nextDouble() * 15.0);
-    final retreatDuration = ((700 + _rng.nextInt(250)) / diff).round();
-    _phases.add(RingPhase(
-      targetRadius: retreatRadius,
-      durationMs: retreatDuration.clamp(600, 1000),
-      curve: Curves.easeOutQuad,
-      type: TimingPhaseType.retreat,
-    ));
+        // Strike Window: Ring locked on inner circle, turns fiery ORANGE for ~500ms
+        final windowMs =
+            ((500 + _rng.nextInt(40)) / diff).round().clamp(400, 650);
+        _phases.add(RingPhase(
+          targetRadius: target,
+          durationMs: windowMs,
+          curve: Curves.linear,
+          type: TimingPhaseType.strikeWindow,
+        ));
+
+        // Retreat: If missed, ring smoothly expands back to maxOuterRadius at the same speed
+        final retreatDist = (maxOuterRadius - innerRingRadius).abs();
+        final retreatDuration = (retreatDist / speedPxPerMs).round();
+        _phases.add(RingPhase(
+          targetRadius: maxOuterRadius,
+          durationMs: retreatDuration,
+          curve: Curves.linear,
+          type: TimingPhaseType.retreat,
+        ));
+      } else {
+        // Teaser motion: smooth constant velocity, NO pauses, NO lag
+        final isNearOrange = target <= 46.0;
+        _phases.add(RingPhase(
+          targetRadius: target,
+          durationMs: durationMs,
+          curve: Curves.linear,
+          type: isNearOrange
+              ? TimingPhaseType.deepTease
+              : TimingPhaseType.teaseNibble,
+        ));
+      }
+      current = target;
+    }
 
     _applyPhase(0, nowMs);
   }

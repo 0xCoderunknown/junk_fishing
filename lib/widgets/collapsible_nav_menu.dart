@@ -5,6 +5,7 @@ import '../models/location.dart';
 enum NavAction {
   fish,
   inventory,
+  market,
   collections,
   map,
   settings,
@@ -17,110 +18,86 @@ class CollapsibleNavMenu extends StatelessWidget {
   final Location? currentLocation;
   final ValueChanged<NavAction> onAction;
   final VoidCallback onToggleCollapse;
-  final VoidCallback onBuyBait;
-  final VoidCallback onUpgradeStorage;
+  final VoidCallback? onBuyBait;
+  final VoidCallback? onUpgradeStorage;
 
   const CollapsibleNavMenu({
     super.key,
     required this.isVisible,
     required this.isCollapsed,
     required this.playerState,
-    required this.currentLocation,
+    this.currentLocation,
     required this.onAction,
     required this.onToggleCollapse,
-    required this.onBuyBait,
-    required this.onUpgradeStorage,
+    this.onBuyBait,
+    this.onUpgradeStorage,
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // 1. Top HUD Bar (Wrapped with Flexible/Constrained children to prevent RenderFlex overflow)
+        // 1. Top HUD Bar (Only Cash, Inventory, Bait)
         Positioned(
           top: MediaQuery.of(context).padding.top + 8,
-          left: 12,
-          right: 12,
-          child: Row(
-            children: [
-              // Current Location Badge (Flexible with text ellipsis)
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.75),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white24),
+          left: 16,
+          right: 16,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.82),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white24),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black45,
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.place, color: Colors.tealAccent, size: 14),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          currentLocation?.name ?? 'Unknown Pier',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
-
-              const SizedBox(width: 8),
-
-              // Player Stats HUD (Money, Bait, Bag)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Money
-                    _buildStatChip(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Cash -> tap opens Market
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onAction(NavAction.market),
+                    child: _buildStatChip(
                       icon: Icons.monetization_on,
                       iconColor: Colors.amber,
                       label: '${playerState.money}',
                     ),
-                    const SizedBox(width: 6),
+                  ),
+                  const SizedBox(width: 8),
 
-                    // Bait
-                    GestureDetector(
-                      onTap: onBuyBait,
-                      child: _buildStatChip(
-                        icon: Icons.bug_report,
-                        iconColor: Colors.lightGreenAccent,
-                        label: '${playerState.baitCount}',
-                        actionIcon: Icons.add_circle,
-                      ),
+                  // Inventory -> tap opens Inventory
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onAction(NavAction.inventory),
+                    child: _buildStatChip(
+                      icon: Icons.backpack,
+                      iconColor: Colors.orangeAccent,
+                      label:
+                          '${playerState.inventory.length}/${playerState.storageLimit}',
                     ),
-                    const SizedBox(width: 6),
+                  ),
+                  const SizedBox(width: 8),
 
-                    // Storage
-                    GestureDetector(
-                      onTap: onUpgradeStorage,
-                      child: _buildStatChip(
-                        icon: Icons.backpack,
-                        iconColor: Colors.orangeAccent,
-                        label: '${playerState.inventory.length}/${playerState.storageLimit}',
-                        actionIcon: Icons.upgrade,
-                      ),
+                  // Bait -> tap opens Market
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onAction(NavAction.market),
+                    child: _buildStatChip(
+                      icon: Icons.bug_report,
+                      iconColor: Colors.lightGreenAccent,
+                      label: '${playerState.baitCount}',
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
 
@@ -184,6 +161,11 @@ class CollapsibleNavMenu extends StatelessWidget {
                       label: 'Inventory',
                       action: NavAction.inventory,
                       badgeCount: playerState.inventory.length,
+                    ),
+                    _buildMenuItem(
+                      icon: Icons.storefront,
+                      label: 'Market',
+                      action: NavAction.market,
                     ),
                     _buildMenuItem(
                       icon: Icons.collections_bookmark,

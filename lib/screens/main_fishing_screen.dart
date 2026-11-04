@@ -9,6 +9,7 @@ import '../widgets/comic_speech_bubble.dart';
 import '../widgets/isometric_world.dart';
 import '../widgets/modals/collections_sheet.dart';
 import '../widgets/modals/inventory_sheet.dart';
+import '../widgets/modals/market_sheet.dart';
 import '../widgets/modals/map_sheet.dart';
 import '../widgets/modals/settings_sheet.dart';
 import '../widgets/polaroid_result_card.dart';
@@ -51,6 +52,9 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
         break;
       case NavAction.inventory:
         _showInventoryModal();
+        break;
+      case NavAction.market:
+        _showMarketModal();
         break;
       case NavAction.collections:
         _showCollectionsModal();
@@ -165,6 +169,18 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => InventorySheet(
         playerState: _gameService.playerState,
+        gameService: _gameService,
+        onStateChanged: () => setState(() {}),
+      ),
+    );
+  }
+
+  void _showMarketModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => MarketSheet(
         gameService: _gameService,
         onStateChanged: () => setState(() {}),
       ),

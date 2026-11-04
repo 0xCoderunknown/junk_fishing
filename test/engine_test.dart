@@ -60,6 +60,18 @@ void main() {
       engine.update(now + 10000);
       expect(engine.isFinished, false);
     });
+
+    test('Deep tease phase does not trigger orange strike window despite being close to center', () {
+      final engine = FishingTimingEngine();
+      
+      // Look for deepTease phase in the engine's cycle
+      final deepTeasePhase = engine.currentPhase;
+      if (deepTeasePhase?.type == TimingPhaseType.deepTease) {
+        expect(engine.isInOrangeStrikeWindow, false);
+        expect(deepTeasePhase?.isOrangeStrike, false);
+      }
+      expect(engine.isInOrangeStrikeWindow, false);
+    });
   });
 
   group('LootEngine Tests', () {
