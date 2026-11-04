@@ -12,33 +12,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Architectural Separation of Concerns**:
   - Extracted pure Dart game engines into `lib/engine/`:
-    - `FishingTimingEngine`: Headless simulation of Torchlight-style timing, tease contractions, strike windows, and accuracy calculations.
-    - `LootEngine`: Isolated weighted gacha roller with accuracy bonuses.
+    - `FishingTimingEngine`: Headless simulation of Torchlight-style timing mechanics, procedural teasing contractions, orange strike windows, tolerance calculations, and precision scoring.
+    - `LootEngine`: Isolated weighted gacha roller calculating item rarity drops and factoring in player timing accuracy bonuses.
   - Extracted modular scene rendering into `lib/rendering/scene_painters.dart`:
-    - `EnvironmentPainter`, `LanternLightingPainter`, `FishingHolePainter`, and `FishermanPainter`.
-  - Refactored `IsometricWorld` and `RippleTimingOverlay` into lightweight presentation widgets connected to their respective engines and painters.
-  - Added unit test suite `test/engine_test.dart` covering engine simulation and gacha roller logic.
+    - `EnvironmentPainter`: Forest clearing, mossy ground, dirt path contours, pebbles, and pine tree/boulder silhouettes.
+    - `LanternLightingPainter`: Wooden stand, crate, lantern housing, and radial ambient lighting shader.
+    - `FishingHolePainter`: 3D stone lip blocks, pit depth gradient, and animated concentric ripples.
+    - `FishermanPainter`: Top-down character, outdoor jacket/beanie, rod bending, and vertical line drop physics.
+  - Refactored `IsometricWorld` and `RippleTimingOverlay` into lightweight presentation widgets driven by their respective engines and painters.
+  - Added dedicated unit test suite `test/engine_test.dart` for deterministic engine simulation and loot validation.
 
 ### Added
 - **Top-Down Isometric Fishing Hole Perspective (Step 1)**:
-  - Redesigned `IsometricWorld` from the previous side pier view to match the top-down isometric fishing hole scene from the reference card:
-    - Stone-lined circular fishing well/hole with depth gradient and centered animated water ripples.
-    - Top-down fisherman standing on the left side (with red/orange outdoor jacket, backpack, dark beanie) holding an angled rod over the hole with a vertical line dropping directly into the water.
-    - Lantern post on the upper-right casting a warm atmospheric radial amber glow onto the ground and well.
+  - Transitioned the world view from the previous side-pier layout to an atmospheric top-down isometric fishing hole scene matching the design mock:
+    - Stone-lined circular fishing well/hole with depth gradient and animated water ripples.
+    - Top-down fisherman standing on the left bank holding an angled rod over the hole with a vertical line dropping directly into the water.
+    - Wooden lantern post on the upper-right casting a warm atmospheric radial amber glow onto the ground and well.
     - Surrounding clearing background with woodland ground, dirt path contours, and pine tree/boulder silhouettes.
-    - "TAP THE HOLE" interactive cast prompt perfectly aligned over the stone well.
+    - "TAP THE HOLE" interactive cast prompt aligned directly over the stone well opening.
 - **Torchlight-Style Fishing Mechanic**:
-  - Re-engineered `RippleTimingOverlay` to mirror the Torchlight / Torchlight II fishing minigame.
   - Implemented dynamic pseudo-random bait nibbles where the outer ring shrinks, pauses, expands, and changes speed with organic variation.
-  - Ring can shrink close to the inner ring without turning orange (false nibble tease) before expanding back out.
-  - Added visual strike indicator: when the outer ring contacts the inner ring during a genuine bite, both the ring and hook turn glowing orange/gold and trigger a tactile haptic pulse.
-  - Removed punitive timeout/game-over when failing to tap during the orange window: the fish simply retreats, and the minigame automatically generates a new randomized cycle of nibbles and strikes until the player hooks or cancels.
+  - Deep tease behavior: ring can shrink close to the inner ring without turning orange (false nibble tease) before expanding back out.
+  - Visual strike indicator: when the outer ring contacts the inner ring during a genuine bite, both the ring and hook turn glowing orange/gold and trigger a tactile haptic pulse.
+  - Non-punitive missed bites: failing to tap during an orange window causes the fish to retreat safely, and the minigame automatically generates a new randomized cycle of nibbles and strikes without game over.
   - Full-screen hit detection allows the player to tap anywhere on the screen during the orange strike window to hook the fish.
 
 ### Fixed
 - **Android Gradle Build Configuration**:
   - Disabled Kotlin incremental compilation (`kotlin.incremental=false` in `android/gradle.properties`) to resolve cross-drive Windows path resolution bug (`IllegalArgumentException: this and base files have different roots`).
   - Configured missing SDK build platform dependencies (`android-34`, `android-35`, `android-36`) and CMake 3.22.1 for JNI native plugin compilation.
+  - Re-encoded `force-latest-android-sdk.gradle` to UTF-8 without BOM to resolve Groovy parser startup failure.
+  - Relocated and synced global pub cache to `K:\Android\.pub-cache` via `PUB_CACHE` environment variable to permanently unify project and dependencies on drive `K:`.
 
 ---
 
@@ -73,4 +77,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `README.md`: Architecture manual and developer reference.
 - **Verification & Testing**:
   - `models_and_service_test.dart`: Automated unit test coverage for item/location/collection models, `PlayerState` mutation logic, and `FishingState` order.
-  - Smoke widget test validating clean app mounting.

@@ -351,3 +351,4 @@ class FishermanPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant FishermanPainter oldDelegate) => true;
 }
+

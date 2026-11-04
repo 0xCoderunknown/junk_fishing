@@ -201,3 +201,4 @@ class FishingTimingEngine {
     _isFinished = true;
   }
 }
+
