@@ -116,9 +116,9 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
           // ── 1. Atmospheric blur overlay ───────────────────────────────────
           RepaintBoundary(
             child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-            child: Container(color: Colors.black.withValues(alpha: 0.60)),
-          ),
+              filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
+              child: Container(color: Colors.black.withValues(alpha: 0.60)),
+            ),
           ),
 
           // ── 2. Centered Timing Visuals ────────────────────────────────────
@@ -126,64 +126,6 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Top Status Badge
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _isStrikeWindow
-                        ? const Color(0xFFFF9E00).withValues(alpha: 0.3)
-                        : Colors.black54,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: _isStrikeWindow
-                          ? const Color(0xFFFF9E00)
-                          : Colors.white24,
-                      width: _isStrikeWindow ? 2.5 : 1.5,
-                    ),
-                    boxShadow: [
-                      if (_isStrikeWindow)
-                        BoxShadow(
-                          color: const Color(0xFFFF9E00).withValues(alpha: 0.6),
-                          blurRadius: 18,
-                          spreadRadius: 2,
-                        ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _isStrikeWindow
-                            ? Icons.flash_on
-                            : Icons.remove_red_eye_outlined,
-                        color: _isStrikeWindow
-                            ? const Color(0xFFFFD166)
-                            : Colors.white70,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _isStrikeWindow
-                            ? 'BITE! HOOK NOW!'
-                            : 'WATCH THE WATER...',
-                        style: TextStyle(
-                          color: _isStrikeWindow
-                              ? const Color(0xFFFFD166)
-                              : Colors.white70,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 36),
-
                 // Ring canvas — 300×300px. All effects driven by animElapsedMs.
                 SizedBox(
                   width: 300,
@@ -200,12 +142,12 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
 
                 const SizedBox(height: 36),
 
-                // Action Prompt
+                // Wide Bottom Action Button with Text
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 36,
-                    vertical: 15,
+                    horizontal: 44,
+                    vertical: 16,
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -214,11 +156,16 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                           : [const Color(0xFF2B2D42), const Color(0xFF1E1E24)],
                     ),
                     borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: _isStrikeWindow
+                          ? const Color(0xFFFFD166)
+                          : Colors.white24,
+                      width: _isStrikeWindow ? 2.0 : 1.0,
+                    ),
                     boxShadow: [
                       if (_isStrikeWindow)
                         BoxShadow(
-                          color: const Color(0xFFFF5400)
-                              .withValues(alpha: 0.65),
+                          color: const Color(0xFFFF5400).withValues(alpha: 0.65),
                           blurRadius: 22,
                           spreadRadius: 3,
                         ),
@@ -228,34 +175,21 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.touch_app,
-                        color: _isStrikeWindow ? Colors.white : Colors.white54,
+                        _isStrikeWindow ? Icons.flash_on : Icons.touch_app,
+                        color: _isStrikeWindow ? Colors.white : Colors.white60,
                         size: 24,
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _isStrikeWindow
-                            ? 'CLICK ANYWHERE!'
-                            : 'WAIT FOR ORANGE...',
+                        _isStrikeWindow ? 'STRIKE NOW!' : 'WAIT FOR STRIKE...',
                         style: TextStyle(
-                          color: _isStrikeWindow
-                              ? Colors.white
-                              : Colors.white60,
+                          color: _isStrikeWindow ? Colors.white : Colors.white60,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
+                          letterSpacing: 1.8,
                           fontSize: 16,
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'Wait for circle to turn orange — if missed, it will try again!',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.55),
-                    fontSize: 12,
-                    letterSpacing: 0.5,
                   ),
                 ),
               ],

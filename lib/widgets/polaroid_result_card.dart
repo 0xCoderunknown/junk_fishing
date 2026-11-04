@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -29,12 +30,20 @@ class PolaroidResultCard extends StatefulWidget {
 }
 
 class _PolaroidResultCardState extends State<PolaroidResultCard>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final ScreenshotController _screenshotController = ScreenshotController();
   late AnimationController _animController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _tiltAnimation;
+
+  late AnimationController _exitController;
+  late Animation<double> _exitScale;
+  late Animation<double> _exitRotation;
+  late Animation<double> _exitOpacity;
+
   bool _isSharing = false;
+  bool _isExiting = false;
+  bool _isSelling = false;
 
   @override
   void initState() {
@@ -54,13 +63,62 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
       end: -0.02,
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
+    _exitController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 450),
+    );
+
+    _exitScale = Tween<double>(begin: 1.0, end: 0.02).animate(
+      CurvedAnimation(parent: _exitController, curve: Curves.easeInBack),
+    );
+
+    _exitOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _exitController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _exitRotation = Tween<double>(begin: 0.0, end: 0.50).animate(
+      CurvedAnimation(parent: _exitController, curve: Curves.easeInOut),
+    );
+
     _animController.forward();
   }
 
   @override
   void dispose() {
     _animController.dispose();
+    _exitController.dispose();
     super.dispose();
+  }
+
+  void _triggerKeep() {
+    if (_isExiting) return;
+    HapticFeedback.mediumImpact();
+
+    setState(() {
+      _isExiting = true;
+      _isSelling = false;
+    });
+
+    _exitController.forward().then((_) {
+      widget.onKeep();
+    });
+  }
+
+  void _triggerSell() {
+    if (_isExiting) return;
+    HapticFeedback.mediumImpact();
+
+    setState(() {
+      _isExiting = true;
+      _isSelling = true;
+    });
+
+    _exitController.forward().then((_) {
+      widget.onSell();
+    });
   }
 
   Future<void> _sharePolaroid() async {
@@ -79,7 +137,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
           ShareParams(
             files: [XFile(file.path)],
             text:
-                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in JUNK FISHING! 🎣🤖',
+                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
           ),
         );
       }
@@ -95,15 +153,40 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
     final item = widget.item;
     final rarityColor = getRarityColor(item.rarity);
 
+    final media = MediaQuery.of(context);
+    final screenHeight = media.size.height;
+    final paddingTop = media.padding.top;
+
+    // Calculate pixel flight destination: screen center -> top bar HUD chip
+    final targetY = -(screenHeight * 0.5 - paddingTop - 28);
+    final targetX = _isSelling ? -55.0 : 0.0;
+
     return AnimatedBuilder(
-      animation: _animController,
+      animation: Listenable.merge([_animController, _exitController]),
       builder: (context, child) {
-        return Transform.scale(
-          scale: _scaleAnimation.value,
-          child: Transform.rotate(
-            angle: _tiltAnimation.value,
-            child: Center(
-              child: SingleChildScrollView(
+        double currentScale = _scaleAnimation.value;
+        double currentRotation = _tiltAnimation.value;
+        double opacity = 1.0;
+        Offset translation = Offset.zero;
+
+        if (_isExiting) {
+          final t = _exitController.value;
+          currentScale *= _exitScale.value;
+          currentRotation += _exitRotation.value * (_isSelling ? 1.0 : -1.0);
+          opacity = _exitOpacity.value;
+          translation = Offset(targetX * t, targetY * t);
+        }
+
+        return Opacity(
+          opacity: opacity,
+          child: Transform.translate(
+            offset: translation,
+            child: Transform.scale(
+              scale: currentScale,
+              child: Transform.rotate(
+                angle: currentRotation,
+                child: Center(
+                  child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -401,78 +484,128 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                       const SizedBox(height: 20),
 
                       // Action Buttons Row: Keep, Sell, Share
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // KEEP BUTTON
-                          ElevatedButton.icon(
-                            onPressed: widget.onKeep,
-                            icon: const Icon(Icons.inventory_2, size: 18),
-                            label: const Text('KEEP'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2A9D8F),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 12,
+                      if (!_isExiting)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // KEEP BUTTON
+                            ElevatedButton.icon(
+                              onPressed: _triggerKeep,
+                              icon: const Icon(Icons.inventory_2, size: 18),
+                              label: const Text('KEEP'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2A9D8F),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 4,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 4,
                             ),
-                          ),
-                          const SizedBox(width: 10),
+                            const SizedBox(width: 10),
 
-                          // SELL BUTTON
-                          ElevatedButton.icon(
-                            onPressed: widget.onSell,
-                            icon: const Icon(Icons.currency_exchange, size: 18),
-                            label: Text('SELL (+${item.estimatedValue})'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE76F51),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
+                            // SELL BUTTON
+                            ElevatedButton.icon(
+                              onPressed: _triggerSell,
+                              icon: const Icon(Icons.currency_exchange, size: 18),
+                              label: Text('SELL (+${item.estimatedValue})'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFE76F51),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 4,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 4,
                             ),
-                          ),
-                          const SizedBox(width: 10),
+                            const SizedBox(width: 10),
 
-                          // SHARE BUTTON
-                          IconButton.filled(
-                            onPressed: _sharePolaroid,
-                            icon: _isSharing
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.share, size: 20),
-                            style: IconButton.styleFrom(
-                              backgroundColor: const Color(0xFF264653),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(12),
+                            // SHARE BUTTON
+                            IconButton.filled(
+                              onPressed: _sharePolaroid,
+                              icon: _isSharing
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Icon(Icons.share, size: 20),
+                              style: IconButton.styleFrom(
+                                backgroundColor: const Color(0xFF264653),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(12),
+                              ),
                             ),
+                          ],
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
                           ),
-                        ],
-                      ),
+                          decoration: BoxDecoration(
+                            color: _isSelling
+                                ? Colors.amber
+                                : const Color(0xFF2A9D8F),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _isSelling
+                                    ? Colors.orangeAccent
+                                    : Colors.tealAccent,
+                                blurRadius: 18,
+                                spreadRadius: 3,
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _isSelling
+                                    ? Icons.monetization_on
+                                    : Icons.inventory_2,
+                                color: _isSelling ? Colors.black87 : Colors.white,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _isSelling
+                                    ? '+${item.estimatedValue} COINS!'
+                                    : 'SAVED TO INVENTORY!',
+                                style: TextStyle(
+                                  color:
+                                      _isSelling ? Colors.black87 : Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 14,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
     );
   }
 }

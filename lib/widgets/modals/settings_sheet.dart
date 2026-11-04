@@ -112,7 +112,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'JUNK FISHING v0.1.3 • AI Built & Maintained',
+              'Junk Fishing v0.1.3 • AI Built & Maintained',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.35),
                 fontSize: 11,

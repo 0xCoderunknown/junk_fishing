@@ -19,12 +19,12 @@ stateDiagram-v2
     resultModal --> readyToCast: Result dismissed (Instant re-cast loop)
 ```
 
-1. **`readyToCast`**: The game starts immediately in this active state with the **"TAP THE HOLE"** prompt over the stone well. Top HUD shows Cash (`🪙`), Inventory (`🎒`), and Bait (`🪱`). Sliding navigation drawer provides access to Market, Inventory, Collections, Locations, and Settings.
+1. **`readyToCast`**: The game starts immediately in this active state ready to fish. The entire stone well opening serves as a clean, responsive touch target. Top HUD displays Cash (`🪙`), Inventory (`🎒`), and Bait (`🪱`). The sliding navigation drawer provides quick access to Market, Inventory, Collections, Locations, and Settings.
 2. **`rippleActive`**: The world blurs into the **Torchlight-style timing minigame**:
-   - The outer ring expands and contracts at a **completely constant linear velocity** (~82 px/sec) with zero artificial pauses or lag.
+   - The outer ring expands and contracts with organic easing curves within a constant-velocity travel budget (~82 px/sec) and zero artificial lag.
    - Smooth mind-game waypoint paths glide between Small, Medium, and Big.
    - **Deep Tease**: The ring can dive inward right to the brink of the hook (**42px**, 4px away from the center ring) **without turning orange**, then head back outward.
-   - **Bite Strike Window**: When a genuine bite occurs, the ring contacts the 38px inner ring, locks, and turns **fiery ORANGE** for **~500ms**. Tapping anywhere on screen guarantees a 100% catch!
+   - **Bite Strike Window**: When a genuine bite occurs, the ring contacts the 38px inner ring, locks, and turns **fiery ORANGE** for **~500ms**. Tapping anywhere on screen or on the wide action button guarantees a 100% catch!
    - Failing to tap safely resets the cycle and begins a new pattern without penalty or game over.
 3. **`pullingRod`**: 1.5-second cinematic rod bending tension animation with line vibration and water splashes.
 4. **`resultModal`**:
@@ -62,6 +62,7 @@ lib/
 │   ├── comic_speech_bubble.dart     # Comic fail speech bubble
 │   ├── collapsible_nav_menu.dart    # Collapsible left navigation drawer & top HUD
 │   └── modals/                      # Bottom sheets (market, inventory, collections, map, settings)
+│       ├── game_bottom_sheet.dart   # Shared modal bottom sheet container
 │       ├── market_sheet.dart        # Bait shop, storage upgrades & junk pawn dealer
 │       ├── inventory_sheet.dart     # Scrap inventory viewer & filter
 │       ├── collections_sheet.dart   # Thematic scrap collection sets & rewards

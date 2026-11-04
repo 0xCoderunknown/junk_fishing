@@ -7,7 +7,7 @@
 
 ## 1. Project Identity & Vision
 
-- **App Name**: JUNK FISHING
+- **App Name**: Junk Fishing
 - **Platform Target**: Android-only casual/gacha collection game built with Flutter.
 - **Orientation**: Portrait-only (`DeviceOrientation.portraitUp`). All UI components, hit targets, and touch interactions must cater strictly to one-handed mobile touch ergonomics.
 - **Theme & Lore**: Instead of catching ordinary fish, the player dredges absurd junk, bizarre relics, obsolete technology, and eccentric curiosities from forgotten wells and strange waterways.
@@ -72,8 +72,9 @@ The fishing minigame is inspired by the Torchlight fishing timing mechanic, tune
 1. **Geometry**:
    - Fixed central hook and inner ring at radius `innerRingRadius = 38.0px`.
    - Dynamic outer ring travels between `maxOuterRadius = 135.0px` and `38.0px`.
-2. **Uniform Constant Speed**:
-   - The outer ring expands and contracts at the **exact same constant linear speed** (`Curves.linear`, ~82 px/sec).
+2. **Organic Easing with Constant Travel Budget**:
+   - Travel duration is strictly budgeted at ~82 px/sec constant velocity proportional to distance.
+   - Within each phase, motion curves organically via pure Dart mathematical easing (`easeInOut` for nibbles, `decelerate` for deep teases, `easeIn` for strike surges, `easeOut` for retreats).
    - There are **ZERO** artificial pauses, lags, or jitter steps during travel.
 3. **Mind-Games Paths**:
    - Waypoints cycle smoothly through Small (~55px), Medium (~80–90px), and Big (~130px).
@@ -124,8 +125,9 @@ Whenever an AI agent touches this project, the agent **MUST** adhere to the foll
    - Run `flutter test` after code changes.
    - All tests in `test/` must pass before finishing your turn.
    - If engine mechanics or state transitions change, update the corresponding test cases in `test/engine_test.dart` or `test/models_and_service_test.dart`.
-4. **Mandatory CHANGELOG.md Updates**:
-   - Every modification, refactoring, bugfix, or feature addition MUST be documented with clear bullet points under an appropriate section in `CHANGELOG.md`.
+4. **Player-Focused CHANGELOG.md Updates**:
+   - Document user-facing features, balance tweaks, visual enhancements, and bug fixes under standard sections (`Added`, `Changed`, `Fixed`).
+   - Do not pollute `CHANGELOG.md` with internal code refactoring trivia, plumbing details, or build-environment notes. Keep it clean and meaningful.
 5. **Local JSON Consistency**:
    - If adding new items in `assets/data/items.json`, ensure their `id` is mapped to at least one entry in `locations.json` and a matching category in `collections.json`.
 6. **Git Protocol**:

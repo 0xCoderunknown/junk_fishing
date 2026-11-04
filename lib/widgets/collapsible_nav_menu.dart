@@ -5,7 +5,7 @@ import '../models/player_state.dart';
 
 enum NavAction { fish, inventory, market, collections, map, settings }
 
-class CollapsibleNavMenu extends StatelessWidget {
+class CollapsibleNavMenu extends StatefulWidget {
   final bool isVisible;
   final bool isCollapsed;
   final PlayerState playerState;
@@ -22,6 +22,79 @@ class CollapsibleNavMenu extends StatelessWidget {
     required this.onAction,
     required this.onToggleCollapse,
   });
+
+  @override
+  State<CollapsibleNavMenu> createState() => _CollapsibleNavMenuState();
+}
+
+class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _badgeController;
+  late Animation<double> _badgeScale;
+  late Animation<double> _badgeOpacity;
+  late Animation<Offset> _badgeOffset;
+
+  String? _badgeText;
+  bool _badgeIsCoins = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _badgeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _badgeScale = Tween<double>(begin: 0.6, end: 1.15).animate(
+      CurvedAnimation(
+        parent: _badgeController,
+        curve: const Interval(0.0, 0.4, curve: Curves.elasticOut),
+      ),
+    );
+
+    _badgeOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _badgeController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _badgeOffset = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(0, -22),
+    ).animate(
+      CurvedAnimation(
+        parent: _badgeController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+  }
+
+  @override
+  void didUpdateWidget(CollapsibleNavMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final moneyDelta = widget.playerState.money - oldWidget.playerState.money;
+    if (moneyDelta > 0) {
+      _badgeText = '+$moneyDelta';
+      _badgeIsCoins = true;
+      _badgeController.forward(from: 0.0);
+    } else {
+      final invDelta =
+          widget.playerState.inventory.length - oldWidget.playerState.inventory.length;
+      if (invDelta > 0) {
+        _badgeText = '+$invDelta';
+        _badgeIsCoins = false;
+        _badgeController.forward(from: 0.0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _badgeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,38 +124,142 @@ class CollapsibleNavMenu extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Cash -> tap opens Market
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onAction(NavAction.market),
-                    child: _buildStatChip(
-                      icon: Icons.monetization_on,
-                      iconColor: Colors.amber,
-                      label: '${playerState.money}',
-                    ),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => widget.onAction(NavAction.market),
+                        child: _buildStatChip(
+                          icon: Icons.monetization_on,
+                          iconColor: Colors.amber,
+                          label: '${widget.playerState.money}',
+                        ),
+                      ),
+                      if (_badgeIsCoins && _badgeText != null)
+                        Positioned(
+                          top: -20,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _badgeController,
+                              builder: (context, child) {
+                                return Transform.translate(
+                                  offset: _badgeOffset.value,
+                                  child: Opacity(
+                                    opacity: _badgeOpacity.value,
+                                    child: Transform.scale(
+                                      scale: _badgeScale.value,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber,
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.orangeAccent,
+                                              blurRadius: 10,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          _badgeText!,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 12),
 
                   // Inventory -> tap opens Inventory
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onAction(NavAction.inventory),
-                    child: _buildStatChip(
-                      icon: Icons.backpack,
-                      iconColor: Colors.orangeAccent,
-                      label:
-                          '${playerState.inventory.length}/${playerState.storageLimit}',
-                    ),
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => widget.onAction(NavAction.inventory),
+                        child: _buildStatChip(
+                          icon: Icons.backpack,
+                          iconColor: Colors.orangeAccent,
+                          label:
+                              '${widget.playerState.inventory.length}/${widget.playerState.storageLimit}',
+                        ),
+                      ),
+                      if (!_badgeIsCoins && _badgeText != null)
+                        Positioned(
+                          top: -20,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _badgeController,
+                              builder: (context, child) {
+                                return Transform.translate(
+                                  offset: _badgeOffset.value,
+                                  child: Opacity(
+                                    opacity: _badgeOpacity.value,
+                                    child: Transform.scale(
+                                      scale: _badgeScale.value,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF2A9D8F),
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.tealAccent,
+                                              blurRadius: 10,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          _badgeText!,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 12),
 
                   // Bait -> tap opens Market
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => onAction(NavAction.market),
+                    onTap: () => widget.onAction(NavAction.market),
                     child: _buildStatChip(
                       icon: Icons.bug_report,
                       iconColor: Colors.lightGreenAccent,
-                      label: '${playerState.baitCount}',
+                      label: '${widget.playerState.baitCount}',
                     ),
                   ),
                 ],
@@ -96,7 +273,7 @@ class CollapsibleNavMenu extends StatelessWidget {
           duration: const Duration(milliseconds: 350),
           curve: Curves.easeInOutCubic,
           top: MediaQuery.of(context).size.height * 0.18,
-          left: isVisible ? (isCollapsed ? -175 : 12) : -220,
+          left: widget.isVisible ? (widget.isCollapsed ? -175 : 12) : -220,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -137,7 +314,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'JUNK FISHING',
+                            'Junk Fishing',
                             style: TextStyle(
                               color: Colors.cyan.shade200,
                               fontWeight: FontWeight.w900,
@@ -160,7 +337,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                       icon: Icons.backpack,
                       label: 'Inventory',
                       action: NavAction.inventory,
-                      badgeCount: playerState.inventory.length,
+                      badgeCount: widget.playerState.inventory.length,
                     ),
                     _buildMenuItem(
                       icon: Icons.storefront,
@@ -190,7 +367,7 @@ class CollapsibleNavMenu extends StatelessWidget {
 
               // Drawer Toggle Handle Button
               GestureDetector(
-                onTap: onToggleCollapse,
+                onTap: widget.onToggleCollapse,
                 child: Container(
                   width: 32,
                   height: 48,
@@ -204,7 +381,7 @@ class CollapsibleNavMenu extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      isCollapsed ? Icons.chevron_right : Icons.chevron_left,
+                      widget.isCollapsed ? Icons.chevron_right : Icons.chevron_left,
                       color: Colors.cyanAccent,
                       size: 20,
                     ),
@@ -260,7 +437,7 @@ class CollapsibleNavMenu extends StatelessWidget {
             )
           : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onTap: () => onAction(action),
+      onTap: () => widget.onAction(action),
     );
   }
 

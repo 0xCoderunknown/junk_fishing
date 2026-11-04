@@ -131,7 +131,7 @@ class _IsometricWorldState extends State<IsometricWorld>
               },
             ),
 
-            // 5. Interactive "TAP THE HOLE" Target Prompt
+            // 5. Interactive Fishing Hole Target (Clean Touch Zone - No Overlapping Ring)
             if (widget.state == FishingState.readyToCast)
               Positioned(
                 left: holeCenter.dx - holeRadiusX,
@@ -141,42 +141,7 @@ class _IsometricWorldState extends State<IsometricWorld>
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: widget.onPondTap,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.amberAccent,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.touch_app,
-                            color: Colors.amberAccent,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'TAP THE HOLE',
-                            style: TextStyle(
-                              color: Colors.amber.shade200,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.4,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: const SizedBox.expand(),
                 ),
               ),
           ],
