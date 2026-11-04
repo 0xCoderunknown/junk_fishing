@@ -5,8 +5,9 @@ import 'package:flutter/animation.dart';
 enum TimingPhaseType {
   teaseNibble,
   deepTease,
-  strikeWindow,
-  retreat,
+  strikeContraction, // Ring contracting toward center (blue/cyan)
+  strikeWindow,      // RINGS MET! TURNS ORANGE - PLAYER MUST TAP HERE!
+  retreat,           // Missed window - ring smoothly opens back up
 }
 
 class RingPhase {
@@ -28,12 +29,14 @@ class RingPhase {
 /// Pure Dart fishing timing simulation engine.
 ///
 /// Torchlight Timing Dynamics:
-/// - Smooth, steady pacing: A full fishing cycle unfolds over ~3.5 to 5.0 seconds.
-/// - Tease contractions move steadily (800ms - 1400ms) rather than erratic jitter.
-/// - Deep teases shrink toward the inner ring smoothly without snapping.
-/// - When the fish bites, the outer ring contracts smoothly into the center and turns ORANGE.
-/// - Generous strike linger window (650ms - 850ms) gives the player comfortable reaction time.
-/// - If missed, the ring smoothly floats back out and repeats seamlessly without game over.
+/// - A central hook sits inside a fixed inner ring (radius: 38px).
+/// - Outer ring glides calmly through 1-2 teasing contractions.
+/// - When a strike occurs:
+///   1. `strikeContraction`: The ring contracts down toward the inner ring (~1200ms). It is still BLUE/CYAN here!
+///   2. `strikeWindow`: The instant the ring reaches the inner ring, IT LOCKS AT 38px AND TURNS ORANGE!
+///      The orange window stays active for a generous 950ms (human-friendly reaction window).
+///      Any tap during this period is a guaranteed catch!
+///   3. If the player doesn't tap during the orange window, it smoothly expands back out to retry without game over.
 class FishingTimingEngine {
   final double difficultyMultiplier;
   final Random _rng;
@@ -58,7 +61,8 @@ class FishingTimingEngine {
     this.difficultyMultiplier = 1.0,
     Random? rng,
   }) : _rng = rng ?? Random() {
-    strikeTolerance = (14.0 / difficultyMultiplier).clamp(9.0, 20.0);
+    // Generous strike tolerance: 22px buffer
+    strikeTolerance = (22.0 / difficultyMultiplier).clamp(16.0, 30.0);
     generateCycle();
   }
 
@@ -67,12 +71,24 @@ class FishingTimingEngine {
   RingPhase? get currentPhase =>
       _phaseIndex < _phases.length ? _phases[_phaseIndex] : null;
 
-  /// Whether the outer ring is currently in the active strike window
+  /// Exactly matches what the user sees on screen:
+  /// True if and only if the current phase is [TimingPhaseType.strikeWindow]
+  /// OR the ring is within the generous strike tolerance of the center hook!
   bool get isInOrangeStrikeWindow {
     if (_isFinished || currentPhase == null) return false;
-    if (!currentPhase!.isOrangeStrike) return false;
-    final dist = (_currentRadius - innerRingRadius).abs();
-    return dist <= strikeTolerance;
+    
+    // During the dedicated orange linger window, it is ALWAYS active orange!
+    if (currentPhase!.isOrangeStrike) {
+      return true;
+    }
+    
+    // Also active if contracting close during a strike attempt
+    if (currentPhase!.type == TimingPhaseType.strikeContraction) {
+      final dist = (_currentRadius - innerRingRadius).abs();
+      return dist <= strikeTolerance;
+    }
+    
+    return false;
   }
 
   /// Generates a smooth, natural Torchlight-paced movement cycle
@@ -89,51 +105,51 @@ class FishingTimingEngine {
       TimingPhaseType pType;
 
       if (teaseKind == 0) {
-        // Deep tease: smoothly glides near the inner ring (48-56px), but doesn't strike or turn orange!
-        shrinkTo = innerRingRadius + strikeTolerance + 4.0 + _rng.nextDouble() * 12.0;
+        // Deep tease: smoothly glides near the inner ring (65-75px), but doesn't strike or turn orange!
+        shrinkTo = innerRingRadius + strikeTolerance + 15.0 + _rng.nextDouble() * 15.0;
         pType = TimingPhaseType.deepTease;
       } else if (teaseKind == 1) {
         // Moderate nibble
-        shrinkTo = 65.0 + _rng.nextDouble() * 25.0;
+        shrinkTo = 75.0 + _rng.nextDouble() * 20.0;
         pType = TimingPhaseType.teaseNibble;
       } else {
         // Shallow ripple
-        shrinkTo = 90.0 + _rng.nextDouble() * 25.0;
+        shrinkTo = 95.0 + _rng.nextDouble() * 25.0;
         pType = TimingPhaseType.teaseNibble;
       }
 
-      // Smooth, deliberate travel speed: ~900ms - 1500ms
-      final shrinkDuration = (1000 + _rng.nextInt(500)) ~/ diff;
+      // Smooth deliberate travel speed: ~1100ms - 1500ms
+      final shrinkDuration = (1200 + _rng.nextInt(400)) ~/ diff;
       _phases.add(RingPhase(
         targetRadius: shrinkTo,
-        durationMs: shrinkDuration.clamp(750, 1600),
+        durationMs: shrinkDuration.clamp(900, 1600),
         curve: Curves.easeInOutSine,
         type: pType,
       ));
 
-      // Gentle pause/float back out: ~800ms - 1300ms
-      final expandTo = min(maxOuterRadius, shrinkTo + 30.0 + _rng.nextDouble() * 45.0);
-      final expandDuration = (900 + _rng.nextInt(400)) ~/ diff;
+      // Gentle pause/float back out: ~1000ms - 1400ms
+      final expandTo = min(maxOuterRadius, shrinkTo + 35.0 + _rng.nextDouble() * 40.0);
+      final expandDuration = (1100 + _rng.nextInt(350)) ~/ diff;
       _phases.add(RingPhase(
         targetRadius: expandTo,
-        durationMs: expandDuration.clamp(700, 1400),
+        durationMs: expandDuration.clamp(800, 1500),
         curve: Curves.easeInOutSine,
         type: TimingPhaseType.teaseNibble,
       ));
     }
 
-    // THE REAL STRIKE: Outer ring contracts steadily and deliberately right down to the inner ring
-    final strikeDuration = (1100 + _rng.nextInt(300)) ~/ diff;
+    // STEP 1: Contraction down to the inner ring (Steady, predictable motion)
+    final strikeDuration = (1250 + _rng.nextInt(250)) ~/ diff;
     _phases.add(RingPhase(
       targetRadius: innerRingRadius,
-      durationMs: strikeDuration.clamp(800, 1500),
+      durationMs: strikeDuration.clamp(1000, 1600),
       curve: Curves.easeInOutQuad,
-      type: TimingPhaseType.strikeWindow,
+      type: TimingPhaseType.strikeContraction,
     ));
 
-    // The strike linger window (ORANGE GLOW):
-    // Comfortable human reaction time (~650ms to 850ms)
-    final windowMs = (750 / diff).clamp(550, 950).toInt();
+    // STEP 2: The ORANGE BITE WINDOW (Outer ring meets inner ring & turns fiery orange!)
+    // Generous human-friendly window: ~950ms
+    final windowMs = (950 / diff).clamp(750, 1200).toInt();
     _phases.add(RingPhase(
       targetRadius: innerRingRadius,
       durationMs: windowMs,
@@ -141,11 +157,11 @@ class FishingTimingEngine {
       type: TimingPhaseType.strikeWindow,
     ));
 
-    // Smooth retreat without penalty if player missed the window
+    // STEP 3: Smooth retreat without penalty if player missed the window
     final retreatRadius = maxOuterRadius - (_rng.nextDouble() * 15.0);
     _phases.add(RingPhase(
       targetRadius: retreatRadius,
-      durationMs: (1000 + _rng.nextInt(300)) ~/ diff,
+      durationMs: (1100 + _rng.nextInt(300)) ~/ diff,
       curve: Curves.easeOutSine,
       type: TimingPhaseType.retreat,
     ));
@@ -194,7 +210,7 @@ class FishingTimingEngine {
 
     if (isInOrangeStrikeWindow) {
       final dist = (_currentRadius - innerRingRadius).abs();
-      final accuracy = (1.0 - (dist / strikeTolerance)).clamp(0.0, 1.0);
+      final accuracy = (1.0 - (dist / strikeTolerance)).clamp(0.2, 1.0);
       return (success: true, accuracy: accuracy);
     } else {
       // Tap outside strike window = premature strike fail
