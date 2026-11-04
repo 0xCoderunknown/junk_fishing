@@ -54,6 +54,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added dedicated unit test suite `test/engine_test.dart` for deterministic engine simulation and loot validation.
 
 ### Added
+- **Comprehensive AI Maintainer Manual & Technical Charter (`AGENTS.md`)**:
+  - Expanded `AGENTS.md` into an in-depth technical manual for future AI agents operating on this repository.
+  - Documents the full architectural layering, state machine lifecycle, constant-speed timing physics, loot math, economic loops, and the 6 mandatory operational protocols.
+  - Updated `README.md` to mirror the latest direct cast state flow, market system, and constant-velocity mind-games mechanics.
 - **Top-Down Isometric Fishing Hole Perspective (Step 1)**:
   - Transitioned the world view from the previous side-pier layout to an atmospheric top-down isometric fishing hole scene matching the design mock:
     - Stone-lined circular fishing well/hole with depth gradient and animated water ripples.
