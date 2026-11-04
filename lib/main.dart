@@ -29,7 +29,7 @@ class JunkFishingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Junk Fishing',
+      title: 'JUNK FISHING',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,

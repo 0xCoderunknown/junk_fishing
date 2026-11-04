@@ -79,7 +79,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
           ShareParams(
             files: [XFile(file.path)],
             text:
-                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
+                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in JUNK FISHING! 🎣🤖',
           ),
         );
       }

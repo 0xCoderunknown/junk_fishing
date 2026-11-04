@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] - 2026-11-04
 
 ### Added
+- **Official App Branding — JUNK FISHING**:
+  - Standardized the official game title to **JUNK FISHING** across `AndroidManifest.xml` (`android:label`), `MaterialApp` title, in-app settings footer, Polaroid share card, and maintainer documentation.
 - **Custom Hook Launcher App Icon**:
   - Incorporated `hook.png` into `assets/images/app_icon.png`.
   - Generated full-density Android launcher icons across all mipmap targets (`mdpi` 48x48, `hdpi` 72x72, `xhdpi` 96x96, `xxhdpi` 144x144, `xxxhdpi` 192x192) with high-quality bicubic interpolation and transparency.

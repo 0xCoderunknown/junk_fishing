@@ -7,7 +7,7 @@
 
 ## 1. Project Identity & Vision
 
-- **App Name**: Junk Fishing
+- **App Name**: JUNK FISHING
 - **Platform Target**: Android-only casual/gacha collection game built with Flutter.
 - **Orientation**: Portrait-only (`DeviceOrientation.portraitUp`). All UI components, hit targets, and touch interactions must cater strictly to one-handed mobile touch ergonomics.
 - **Theme & Lore**: Instead of catching ordinary fish, the player dredges absurd junk, bizarre relics, obsolete technology, and eccentric curiosities from forgotten wells and strange waterways.
