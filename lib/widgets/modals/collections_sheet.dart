@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../services/game_data_service.dart';
 import '../../utils/item_icon_helper.dart';
 
@@ -69,10 +70,16 @@ class CollectionsSheet extends StatelessWidget {
               itemCount: collections.length,
               itemBuilder: (context, index) {
                 final col = collections[index];
-                final isClaimed = playerState.claimedCollectionIds.contains(col.id);
-                final isComplete = col.isComplete(playerState.discoveredItemIds);
+                final isClaimed = playerState.claimedCollectionIds.contains(
+                  col.id,
+                );
+                final isComplete = col.isComplete(
+                  playerState.discoveredItemIds,
+                );
                 final progress = col.progress(playerState.discoveredItemIds);
-                final discoveredCount = col.itemIds.where(playerState.discoveredItemIds.contains).length;
+                final discoveredCount = col.itemIds
+                    .where(playerState.discoveredItemIds.contains)
+                    .length;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
@@ -81,7 +88,9 @@ class CollectionsSheet extends StatelessWidget {
                     color: const Color(0xFF1E2430),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isComplete ? Colors.amberAccent.withValues(alpha: 0.5) : Colors.white12,
+                      color: isComplete
+                          ? Colors.amberAccent.withValues(alpha: 0.5)
+                          : Colors.white12,
                       width: 1.5,
                     ),
                   ),
@@ -102,21 +111,32 @@ class CollectionsSheet extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: isClaimed
                                   ? Colors.green.withValues(alpha: 0.2)
-                                  : (isComplete ? Colors.amber.withValues(alpha: 0.2) : Colors.black38),
+                                  : (isComplete
+                                        ? Colors.amber.withValues(alpha: 0.2)
+                                        : Colors.black38),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.monetization_on, color: Colors.amber, size: 14),
+                                const Icon(
+                                  Icons.monetization_on,
+                                  color: Colors.amber,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   isClaimed ? 'CLAIMED' : '+${col.rewardMoney}',
                                   style: TextStyle(
-                                    color: isClaimed ? Colors.greenAccent : Colors.amberAccent,
+                                    color: isClaimed
+                                        ? Colors.greenAccent
+                                        : Colors.amberAccent,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -129,7 +149,10 @@ class CollectionsSheet extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         col.description,
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(height: 12),
 
@@ -139,7 +162,9 @@ class CollectionsSheet extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: progress,
                           backgroundColor: Colors.white12,
-                          color: isComplete ? Colors.amberAccent : Colors.cyanAccent,
+                          color: isComplete
+                              ? Colors.amberAccent
+                              : Colors.cyanAccent,
                           minHeight: 6,
                         ),
                       ),
@@ -149,11 +174,18 @@ class CollectionsSheet extends StatelessWidget {
                         children: [
                           Text(
                             '$discoveredCount of ${col.itemIds.length} found',
-                            style: const TextStyle(color: Colors.white54, fontSize: 11),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 11,
+                            ),
                           ),
                           Text(
                             '${(progress * 100).toInt()}%',
-                            style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -165,14 +197,19 @@ class CollectionsSheet extends StatelessWidget {
                         runSpacing: 8,
                         children: col.itemIds.map((itemId) {
                           final item = gameService.getItemById(itemId);
-                          final isFound = playerState.discoveredItemIds.contains(itemId);
-                          final rarityColor = item != null ? getRarityColor(item.rarity) : Colors.grey;
+                          final isFound = playerState.discoveredItemIds
+                              .contains(itemId);
+                          final rarityColor = item != null
+                              ? getRarityColor(item.rarity)
+                              : Colors.grey;
 
                           return Container(
                             width: 52,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: isFound ? const Color(0xFF263040) : Colors.black38,
+                              color: isFound
+                                  ? const Color(0xFF263040)
+                                  : Colors.black38,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isFound ? rarityColor : Colors.white10,
@@ -208,11 +245,15 @@ class CollectionsSheet extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.amberAccent,
                               foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             child: Text(
                               'CLAIM 🪙 ${col.rewardMoney} REWARD',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),

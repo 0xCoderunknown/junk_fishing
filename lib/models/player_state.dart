@@ -35,6 +35,7 @@ class PlayerState {
   }
 
   bool get hasStorageSpace => inventory.length < storageLimit;
+
   bool get canFish => baitCount > 0 && hasStorageSpace;
 
   PlayerState copyWith({
@@ -81,7 +82,8 @@ class PlayerState {
       baitCount: (json['baitCount'] as num?)?.toInt() ?? 20,
       storageLimit: (json['storageLimit'] as num?)?.toInt() ?? 20,
       inventory: items,
-      currentLocationId: json['currentLocationId'] as String? ?? 'loc_rusty_dock',
+      currentLocationId:
+          json['currentLocationId'] as String? ?? 'loc_rusty_dock',
       discoveredItemIds: discovered,
       claimedCollectionIds: claimed,
       unlockedLocationIds: unlocked,

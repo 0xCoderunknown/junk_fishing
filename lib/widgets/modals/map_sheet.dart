@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../services/game_data_service.dart';
 
 class MapSheet extends StatefulWidget {
@@ -62,11 +63,16 @@ class _MapSheetState extends State<MapSheet> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black45,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: Colors.amber.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -94,13 +100,17 @@ class _MapSheetState extends State<MapSheet> {
               itemBuilder: (context, index) {
                 final loc = locations[index];
                 final isCurrent = loc.id == currentLocId;
-                final isUnlocked = widget.gameService.isLocationUnlocked(loc.id);
+                final isUnlocked = widget.gameService.isLocationUnlocked(
+                  loc.id,
+                );
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isCurrent ? const Color(0xFF20323F) : const Color(0xFF1E2430),
+                    color: isCurrent
+                        ? const Color(0xFF20323F)
+                        : const Color(0xFF1E2430),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isCurrent ? Colors.tealAccent : Colors.white12,
@@ -118,7 +128,9 @@ class _MapSheetState extends State<MapSheet> {
                         ),
                         child: Icon(
                           isUnlocked ? Icons.waves : Icons.lock,
-                          color: isUnlocked ? Colors.tealAccent : Colors.white38,
+                          color: isUnlocked
+                              ? Colors.tealAccent
+                              : Colors.white38,
                           size: 24,
                         ),
                       ),
@@ -159,7 +171,10 @@ class _MapSheetState extends State<MapSheet> {
                       const SizedBox(width: 8),
                       if (isCurrent)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.tealAccent,
                             borderRadius: BorderRadius.circular(12),
@@ -183,17 +198,28 @@ class _MapSheetState extends State<MapSheet> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2A9D8F),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          child: const Text('TRAVEL', style: TextStyle(fontSize: 11)),
+                          child: const Text(
+                            'TRAVEL',
+                            style: TextStyle(fontSize: 11),
+                          ),
                         )
                       else
                         ElevatedButton(
                           onPressed: playerMoney >= _unlockCost
                               ? () async {
                                   final success = await widget.gameService
-                                      .unlockLocation(loc.id, cost: _unlockCost);
+                                      .unlockLocation(
+                                        loc.id,
+                                        cost: _unlockCost,
+                                      );
                                   if (success) {
                                     HapticFeedback.mediumImpact();
                                     setState(() {});
@@ -206,12 +232,20 @@ class _MapSheetState extends State<MapSheet> {
                             foregroundColor: Colors.black,
                             disabledBackgroundColor: Colors.white10,
                             disabledForegroundColor: Colors.white38,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           child: Text(
                             '🪙 $_unlockCost',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                     ],

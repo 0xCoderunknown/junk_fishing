@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/fishing_state.dart';
 import '../models/location.dart';
 import '../rendering/scene_painters.dart';
@@ -93,9 +94,7 @@ class _IsometricWorldState extends State<IsometricWorld>
 
                 // 2. Wooden Stand & Glowing Lantern
                 CustomPaint(
-                  painter: LanternLightingPainter(
-                    lanternPos: lanternPos,
-                  ),
+                  painter: LanternLightingPainter(lanternPos: lanternPos),
                 ),
 
                 // 3. Stone Fishing Hole & Animated Water

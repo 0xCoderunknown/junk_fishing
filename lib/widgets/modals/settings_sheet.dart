@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../services/game_data_service.dart';
 
 class SettingsSheet extends StatelessWidget {
@@ -52,8 +53,14 @@ class SettingsSheet extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.vibration, color: Colors.white70),
-            title: const Text('Haptic Feedback', style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Vibrate upon timing strike', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            title: const Text(
+              'Haptic Feedback',
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: const Text(
+              'Vibrate upon timing strike',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
             trailing: Switch(
               value: true,
               activeThumbColor: Colors.tealAccent,
@@ -63,8 +70,14 @@ class SettingsSheet extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.volume_up, color: Colors.white70),
-            title: const Text('Sound FX', style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Water splash and rod tension audio', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            title: const Text(
+              'Sound FX',
+              style: TextStyle(color: Colors.white),
+            ),
+            subtitle: const Text(
+              'Water splash and rod tension audio',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
             trailing: Switch(
               value: true,
               activeThumbColor: Colors.tealAccent,
@@ -76,14 +89,23 @@ class SettingsSheet extends StatelessWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.restart_alt, color: Colors.redAccent),
-            title: const Text('Reset Save Data', style: TextStyle(color: Colors.redAccent)),
-            subtitle: const Text('Restore default 100 coins and 15 bait', style: TextStyle(color: Colors.white54, fontSize: 12)),
+            title: const Text(
+              'Reset Save Data',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+            subtitle: const Text(
+              'Restore default 100 coins and 15 bait',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
             onTap: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   backgroundColor: const Color(0xFF1E2430),
-                  title: const Text('Reset All Progress?', style: TextStyle(color: Colors.white)),
+                  title: const Text(
+                    'Reset All Progress?',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   content: const Text(
                     'This will erase your inventory and reset your scrap coins.',
                     style: TextStyle(color: Colors.white70),
@@ -95,8 +117,13 @@ class SettingsSheet extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                      child: const Text('Reset', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                      ),
+                      child: const Text(
+                        'Reset',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
@@ -113,7 +140,10 @@ class SettingsSheet extends StatelessWidget {
           Center(
             child: Text(
               'Junk Fishing v1.0.0 • Deterministic Gacha Engine',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 11),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.3),
+                fontSize: 11,
+              ),
             ),
           ),
           const SizedBox(height: 12),

@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/player_state.dart';
-import '../models/location.dart';
 
-enum NavAction {
-  fish,
-  inventory,
-  market,
-  collections,
-  map,
-  settings,
-}
+import '../models/location.dart';
+import '../models/player_state.dart';
+
+enum NavAction { fish, inventory, market, collections, map, settings }
 
 class CollapsibleNavMenu extends StatelessWidget {
   final bool isVisible;
@@ -113,7 +107,10 @@ class CollapsibleNavMenu extends StatelessWidget {
               // Menu Card
               Container(
                 width: 175,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xEE161B22),
                   borderRadius: BorderRadius.circular(20),
@@ -131,10 +128,17 @@ class CollapsibleNavMenu extends StatelessWidget {
                   children: [
                     // Brand / Title Header
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 8,
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.phishing, color: Colors.cyanAccent, size: 20),
+                          const Icon(
+                            Icons.phishing,
+                            color: Colors.cyanAccent,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'JUNK FISHING',

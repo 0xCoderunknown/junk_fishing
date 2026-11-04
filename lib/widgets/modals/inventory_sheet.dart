@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../models/item.dart';
 import '../../models/player_state.dart';
 import '../../services/game_data_service.dart';
@@ -28,7 +29,9 @@ class _InventorySheetState extends State<InventorySheet> {
     final inventory = widget.gameService.playerState.inventory;
     final filtered = _selectedFilterRarity == 0
         ? inventory
-        : inventory.where((item) => item.rarity == _selectedFilterRarity).toList();
+        : inventory
+              .where((item) => item.rarity == _selectedFilterRarity)
+              .toList();
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.82,
@@ -71,7 +74,10 @@ class _InventorySheetState extends State<InventorySheet> {
                   TextButton.icon(
                     onPressed: () async {
                       for (final item in List<Item>.from(inventory)) {
-                        await widget.gameService.sellItem(item, fromInventory: true);
+                        await widget.gameService.sellItem(
+                          item,
+                          fromInventory: true,
+                        );
                       }
                       widget.onStateChanged();
                       if (context.mounted) {
@@ -112,24 +118,33 @@ class _InventorySheetState extends State<InventorySheet> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 56, color: Colors.white.withValues(alpha: 0.2)),
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 56,
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
                         const SizedBox(height: 12),
                         Text(
-                          inventory.isEmpty ? 'Your junk pouch is empty!\nGo cast a line.' : 'No items match filter.',
+                          inventory.isEmpty
+                              ? 'Your junk pouch is empty!\nGo cast a line.'
+                              : 'No items match filter.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                          ),
                         ),
                       ],
                     ),
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.9,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.9,
+                        ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final item = filtered[index];
@@ -140,7 +155,10 @@ class _InventorySheetState extends State<InventorySheet> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E2430),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: rarityColor.withValues(alpha: 0.4), width: 1.5),
+                          border: Border.all(
+                            color: rarityColor.withValues(alpha: 0.4),
+                            width: 1.5,
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,21 +168,35 @@ class _InventorySheetState extends State<InventorySheet> {
                               children: [
                                 Text(
                                   item.rarityStars,
-                                  style: TextStyle(color: rarityColor, fontSize: 11),
+                                  style: TextStyle(
+                                    color: rarityColor,
+                                    fontSize: 11,
+                                  ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.black45,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.monetization_on, color: Colors.amber, size: 12),
+                                      const Icon(
+                                        Icons.monetization_on,
+                                        color: Colors.amber,
+                                        size: 12,
+                                      ),
                                       const SizedBox(width: 2),
                                       Text(
                                         '${item.estimatedValue}',
-                                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -196,7 +228,10 @@ class _InventorySheetState extends State<InventorySheet> {
                               height: 28,
                               child: OutlinedButton(
                                 onPressed: () async {
-                                  await widget.gameService.sellItem(item, fromInventory: true);
+                                  await widget.gameService.sellItem(
+                                    item,
+                                    fromInventory: true,
+                                  );
                                   widget.onStateChanged();
                                   if (context.mounted) {
                                     setState(() {});
@@ -204,12 +239,21 @@ class _InventorySheetState extends State<InventorySheet> {
                                 },
                                 style: OutlinedButton.styleFrom(
                                   padding: EdgeInsets.zero,
-                                  side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.6)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  side: BorderSide(
+                                    color: Colors.redAccent.withValues(
+                                      alpha: 0.6,
+                                    ),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                                 child: const Text(
                                   'Sell',
-                                  style: TextStyle(color: Colors.redAccent, fontSize: 11),
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
                             ),

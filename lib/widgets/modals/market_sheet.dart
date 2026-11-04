@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../models/item.dart';
 import '../../services/game_data_service.dart';
 
@@ -19,7 +20,10 @@ class MarketSheet extends StatefulWidget {
 
 class _MarketSheetState extends State<MarketSheet> {
   Future<void> _handleBuyBait(int amount, int cost) async {
-    final success = await widget.gameService.buyBait(amount: amount, cost: cost);
+    final success = await widget.gameService.buyBait(
+      amount: amount,
+      cost: cost,
+    );
     if (!mounted) return;
 
     if (success) {
@@ -61,8 +65,10 @@ class _MarketSheetState extends State<MarketSheet> {
   Widget build(BuildContext context) {
     final playerState = widget.gameService.playerState;
     final inventory = playerState.inventory;
-    final scrapTotalValue =
-        inventory.fold<int>(0, (sum, item) => sum + item.estimatedValue);
+    final scrapTotalValue = inventory.fold<int>(
+      0,
+      (sum, item) => sum + item.estimatedValue,
+    );
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -90,7 +96,11 @@ class _MarketSheetState extends State<MarketSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Icon(Icons.storefront, color: Colors.amberAccent, size: 24),
+                const Icon(
+                  Icons.storefront,
+                  color: Colors.amberAccent,
+                  size: 24,
+                ),
                 const SizedBox(width: 10),
                 const Text(
                   'Harbor Market',
@@ -196,7 +206,8 @@ class _MarketSheetState extends State<MarketSheet> {
                 ),
                 _buildMarketTile(
                   title: 'Expand Tackle Bag',
-                  subtitle: '+5 inventory capacity (Now: ${playerState.storageLimit})',
+                  subtitle:
+                      '+5 inventory capacity (Now: ${playerState.storageLimit})',
                   badgeText: null,
                   cost: 150,
                   canAfford: playerState.money >= 150,
@@ -235,7 +246,11 @@ class _MarketSheetState extends State<MarketSheet> {
                           color: Colors.cyan.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.recycling, color: Colors.cyanAccent, size: 24),
+                        child: const Icon(
+                          Icons.recycling,
+                          color: Colors.cyanAccent,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -264,16 +279,24 @@ class _MarketSheetState extends State<MarketSheet> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: inventory.isEmpty ? null : _handleSellAllScrap,
+                        onPressed: inventory.isEmpty
+                            ? null
+                            : _handleSellAllScrap,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.tealAccent.shade700,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Sell All', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'Sell All',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
@@ -384,7 +407,10 @@ class _MarketSheetState extends State<MarketSheet> {
                     if (badgeText != null) ...[
                       const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: badgeColor.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
@@ -418,7 +444,9 @@ class _MarketSheetState extends State<MarketSheet> {
           ElevatedButton(
             onPressed: canAfford ? onBuy : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: canAfford ? const Color(0xFF2A9D8F) : Colors.white10,
+              backgroundColor: canAfford
+                  ? const Color(0xFF2A9D8F)
+                  : Colors.white10,
               foregroundColor: canAfford ? Colors.white : Colors.white38,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               shape: RoundedRectangleBorder(
@@ -428,11 +456,18 @@ class _MarketSheetState extends State<MarketSheet> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.monetization_on, size: 14, color: Colors.amber),
+                const Icon(
+                  Icons.monetization_on,
+                  size: 14,
+                  color: Colors.amber,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '$cost',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -442,4 +477,3 @@ class _MarketSheetState extends State<MarketSheet> {
     );
   }
 }
-

@@ -25,7 +25,8 @@ class Item {
     return Item(
       id: json['id'] as String,
       name: json['name'] as String,
-      flavorText: json['flavorText'] as String? ?? 'A mysterious piece of scrap.',
+      flavorText:
+          json['flavorText'] as String? ?? 'A mysterious piece of scrap.',
       rarity: (json['rarity'] as num?)?.toInt() ?? 1,
       estimatedValue: (json['estimatedValue'] as num?)?.toInt() ?? 10,
       collectionTag: json['collectionTag'] as String? ?? 'General Flotsam',

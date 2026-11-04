@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] - 2026-11-04
 
+### Fixed
+- **Rod Pull Timer Lifecycle Managed** (`main_fishing_screen.dart`):
+  - Stored `_pullTimer` instance in `_MainFishingScreenState` and added explicit cancellation in `dispose()` and prior to new timer creation, preventing potential memory leaks or post-dispose state mutation callbacks during rapid state transitions.
+
 ### Changed (Ring Gameplay Refinements)
 - **Organic easing curves per motion phase** (`fishing_timing_engine.dart`):
   - `teaseNibble` → `Curves.easeInOut`: ring decelerates into each waypoint and accelerates away — like a living creature cautiously circling the bait.

@@ -28,7 +28,8 @@ class Location {
       unlocked: json['unlocked'] as bool? ?? true,
       themeColor: json['themeColor'] as String? ?? '0xFF264653',
       waterColor: json['waterColor'] as String? ?? '0xFF2A9D8F',
-      availableItemIds: (json['availableItemIds'] as List<dynamic>?)
+      availableItemIds:
+          (json['availableItemIds'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],

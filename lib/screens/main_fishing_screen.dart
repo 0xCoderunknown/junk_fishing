@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../models/fishing_state.dart';
 import '../models/item.dart';
 import '../services/game_data_service.dart';
@@ -9,8 +11,8 @@ import '../widgets/comic_speech_bubble.dart';
 import '../widgets/isometric_world.dart';
 import '../widgets/modals/collections_sheet.dart';
 import '../widgets/modals/inventory_sheet.dart';
-import '../widgets/modals/market_sheet.dart';
 import '../widgets/modals/map_sheet.dart';
+import '../widgets/modals/market_sheet.dart';
 import '../widgets/modals/settings_sheet.dart';
 import '../widgets/polaroid_result_card.dart';
 import '../widgets/ripple_timing_overlay.dart';
@@ -34,6 +36,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
   double _lastTimingAccuracy = 0.0;
   Item? _caughtItem;
   bool _isFirstDiscovery = false;
+  Timer? _pullTimer;
 
   @override
   void initState() {
@@ -110,7 +113,8 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     if (success) {
       HapticFeedback.mediumImpact();
       _caughtItem = _gameService.rollCatch(timingBonus: accuracy);
-      _isFirstDiscovery = _caughtItem != null &&
+      _isFirstDiscovery =
+          _caughtItem != null &&
           !_gameService.playerState.discoveredItemIds.contains(_caughtItem!.id);
     } else {
       HapticFeedback.heavyImpact();
@@ -124,12 +128,19 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     });
 
     // Character pulls rod for exactly 1.5 seconds, then enters RESULT_POPUP
-    Timer(const Duration(milliseconds: 1500), () {
+    _pullTimer?.cancel();
+    _pullTimer = Timer(const Duration(milliseconds: 1500), () {
       if (!mounted) return;
       setState(() {
         _fishingState = FishingState.resultModal;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _pullTimer?.cancel();
+    super.dispose();
   }
 
   /// When fishing ends: Return directly to [readyToCast] (Tap the Hole)
@@ -256,7 +267,8 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     }
 
     final location = _gameService.currentLocation;
-    final isMenuVisible = _fishingState == FishingState.idleMenu ||
+    final isMenuVisible =
+        _fishingState == FishingState.idleMenu ||
         _fishingState == FishingState.readyToCast;
 
     return Scaffold(
@@ -309,12 +321,17 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.8),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _lastAttemptSucceeded ? Colors.tealAccent : Colors.redAccent,
+                      color: _lastAttemptSucceeded
+                          ? Colors.tealAccent
+                          : Colors.redAccent,
                       width: 1.5,
                     ),
                   ),
@@ -322,8 +339,12 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _lastAttemptSucceeded ? Icons.check_circle : Icons.cancel,
-                        color: _lastAttemptSucceeded ? Colors.tealAccent : Colors.redAccent,
+                        _lastAttemptSucceeded
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        color: _lastAttemptSucceeded
+                            ? Colors.tealAccent
+                            : Colors.redAccent,
                         size: 18,
                       ),
                       const SizedBox(width: 8),
@@ -332,7 +353,9 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
                             ? 'REELING IN JUNK... (${(_lastTimingAccuracy * 100).toInt()}% ACCURACY)'
                             : 'LINE SNAPPED! REELING IN EMPTY...',
                         style: TextStyle(
-                          color: _lastAttemptSucceeded ? Colors.tealAccent : Colors.redAccent,
+                          color: _lastAttemptSucceeded
+                              ? Colors.tealAccent
+                              : Colors.redAccent,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                           letterSpacing: 1.2,
@@ -357,9 +380,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
                 onSell: _handleSellItem,
               )
             else
-              ComicSpeechBubble(
-                onDismiss: _returnToReadyToCast,
-              ),
+              ComicSpeechBubble(onDismiss: _returnToReadyToCast),
           ],
         ],
       ),

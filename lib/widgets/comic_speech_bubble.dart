@@ -1,13 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ComicSpeechBubble extends StatefulWidget {
   final VoidCallback onDismiss;
 
-  const ComicSpeechBubble({
-    super.key,
-    required this.onDismiss,
-  });
+  const ComicSpeechBubble({super.key, required this.onDismiss});
 
   @override
   State<ComicSpeechBubble> createState() => _ComicSpeechBubbleState();
@@ -41,9 +39,7 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
         fit: StackFit.expand,
         children: [
           // Semi transparent background overlay
-          Container(
-            color: Colors.black.withValues(alpha: 0.35),
-          ),
+          Container(color: Colors.black.withValues(alpha: 0.35)),
 
           // Speech bubble floating above fisherman
           AnimatedBuilder(
@@ -60,7 +56,10 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                   children: [
                     // Comic Bubble
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -76,7 +75,11 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.water_drop, color: Colors.blueAccent, size: 24),
+                          const Icon(
+                            Icons.water_drop,
+                            color: Colors.blueAccent,
+                            size: 24,
+                          ),
                           const SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +122,10 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                     // Clean, borderless Tap to continue prompt
                     Container(
                       margin: const EdgeInsets.only(left: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black87,
                         borderRadius: BorderRadius.circular(14),
@@ -127,7 +133,11 @@ class _ComicSpeechBubbleState extends State<ComicSpeechBubble>
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.touch_app, color: Colors.amberAccent, size: 14),
+                          Icon(
+                            Icons.touch_app,
+                            color: Colors.amberAccent,
+                            size: 14,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'TAP TO CONTINUE',

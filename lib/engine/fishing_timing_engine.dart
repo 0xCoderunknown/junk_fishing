@@ -1,13 +1,14 @@
 import 'dart:math';
+
 import 'package:flutter/animation.dart';
 
 /// Phase types for the Torchlight-style fishing mechanic
 enum TimingPhaseType {
-  teaseNibble,       // Smooth organic glide between waypoints — easeInOut
-  deepTease,         // Dives fast then decelerates near hook — decelerate curve
+  teaseNibble, // Smooth organic glide between waypoints — easeInOut
+  deepTease, // Dives fast then decelerates near hook — decelerate curve
   strikeContraction, // Fish commits: accelerates into inner ring — easeIn
-  strikeWindow,      // Rings meet! Turns fiery ORANGE — player strikes now!
-  retreat,           // Missed window: snaps away fast then drifts — easeOut
+  strikeWindow, // Rings meet! Turns fiery ORANGE — player strikes now!
+  retreat, // Missed window: snaps away fast then drifts — easeOut
 }
 
 class RingPhase {
@@ -61,6 +62,7 @@ class FishingTimingEngine {
   double _currentRadius = maxOuterRadius;
   double _startRadius = maxOuterRadius;
   double _targetRadius = maxOuterRadius;
+
   // Initialized to -1 as a safe sentinel (epoch 0 is a valid timestamp).
   // Set to real millisecondsSinceEpoch in _applyPhase before first update.
   int _phaseStartTimeMs = -1;
@@ -69,16 +71,16 @@ class FishingTimingEngine {
 
   bool _isFinished = false;
 
-  FishingTimingEngine({
-    this.difficultyMultiplier = 1.0,
-    Random? rng,
-  }) : _rng = rng ?? Random() {
+  FishingTimingEngine({this.difficultyMultiplier = 1.0, Random? rng})
+    : _rng = rng ?? Random() {
     strikeTolerance = (22.0 / difficultyMultiplier).clamp(16.0, 30.0);
     generateCycle();
   }
 
   double get currentRadius => _currentRadius;
+
   bool get isFinished => _isFinished;
+
   RingPhase? get currentPhase =>
       _phaseIndex < _phases.length ? _phases[_phaseIndex] : null;
 
@@ -176,34 +178,42 @@ class FishingTimingEngine {
       if (isLastStrike) {
         // ── Strike Contraction ──────────────────────────────────────────────
         // easeIn: starts slow, accelerates into the hook. Fish commits hard.
-        _phases.add(RingPhase(
-          targetRadius: target,
-          durationMs: durationMs,
-          curve: Curves.easeIn,
-          type: TimingPhaseType.strikeContraction,
-        ));
+        _phases.add(
+          RingPhase(
+            targetRadius: target,
+            durationMs: durationMs,
+            curve: Curves.easeIn,
+            type: TimingPhaseType.strikeContraction,
+          ),
+        );
 
         // ── Strike Window ────────────────────────────────────────────────────
         // Ring locked at 38px. Fiery ORANGE for ~500ms. Linear (no movement).
-        final windowMs =
-            ((500 + _rng.nextInt(40)) / diff).round().clamp(400, 650);
-        _phases.add(RingPhase(
-          targetRadius: target,
-          durationMs: windowMs,
-          curve: Curves.linear,
-          type: TimingPhaseType.strikeWindow,
-        ));
+        final windowMs = ((500 + _rng.nextInt(40)) / diff).round().clamp(
+          400,
+          650,
+        );
+        _phases.add(
+          RingPhase(
+            targetRadius: target,
+            durationMs: windowMs,
+            curve: Curves.linear,
+            type: TimingPhaseType.strikeWindow,
+          ),
+        );
 
         // ── Retreat ───────────────────────────────────────────────────────────
         // easeOut: snaps away fast, then drifts. The tension releases.
         final retreatDist = (maxOuterRadius - innerRingRadius).abs();
         final retreatDuration = (retreatDist / speedPxPerMs).round();
-        _phases.add(RingPhase(
-          targetRadius: maxOuterRadius,
-          durationMs: retreatDuration,
-          curve: Curves.easeOut,
-          type: TimingPhaseType.retreat,
-        ));
+        _phases.add(
+          RingPhase(
+            targetRadius: maxOuterRadius,
+            durationMs: retreatDuration,
+            curve: Curves.easeOut,
+            type: TimingPhaseType.retreat,
+          ),
+        );
       } else {
         final isNearOrange = target <= 46.0;
 
@@ -211,22 +221,26 @@ class FishingTimingEngine {
           // ── Deep Tease ─────────────────────────────────────────────────────
           // decelerate: dives in fast then creeps to a stop just outside orange.
           // Maximum fake-out effect — player thinks it's a strike, then... nothing.
-          _phases.add(RingPhase(
-            targetRadius: target,
-            durationMs: durationMs,
-            curve: Curves.decelerate,
-            type: TimingPhaseType.deepTease,
-          ));
+          _phases.add(
+            RingPhase(
+              targetRadius: target,
+              durationMs: durationMs,
+              curve: Curves.decelerate,
+              type: TimingPhaseType.deepTease,
+            ),
+          );
         } else {
           // ── Tease Nibble ───────────────────────────────────────────────────
           // easeInOut: decelerates into the waypoint and accelerates out.
           // Feels like a living creature tugging the line — smooth and organic.
-          _phases.add(RingPhase(
-            targetRadius: target,
-            durationMs: durationMs,
-            curve: Curves.easeInOut,
-            type: TimingPhaseType.teaseNibble,
-          ));
+          _phases.add(
+            RingPhase(
+              targetRadius: target,
+              durationMs: durationMs,
+              curve: Curves.easeInOut,
+              type: TimingPhaseType.teaseNibble,
+            ),
+          );
         }
       }
       current = target;
@@ -287,16 +301,21 @@ class FishingTimingEngine {
 
     if (wasOrange) {
       final now = tapTimeMs ?? DateTime.now().millisecondsSinceEpoch;
-      final elapsedInStrike =
-          (now - _phaseStartTimeMs).clamp(0, _phaseDurationMs);
-      final progress =
-          _phaseDurationMs > 0 ? elapsedInStrike / _phaseDurationMs : 0.5;
+      final elapsedInStrike = (now - _phaseStartTimeMs).clamp(
+        0,
+        _phaseDurationMs,
+      );
+      final progress = _phaseDurationMs > 0
+          ? elapsedInStrike / _phaseDurationMs
+          : 0.5;
 
       // Peak accuracy (1.0) is centered in the bite window.
       // Tapping near either edge grants ~0.65 – 0.70 accuracy.
       final distanceFromCenter = (progress - 0.5).abs() * 2.0;
-      final calculatedAccuracy =
-          (1.0 - (distanceFromCenter * 0.35)).clamp(0.65, 1.0);
+      final calculatedAccuracy = (1.0 - (distanceFromCenter * 0.35)).clamp(
+        0.65,
+        1.0,
+      );
 
       return (success: true, accuracy: calculatedAccuracy);
     } else {

@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../models/item.dart';
 import '../models/location.dart';
 import '../utils/item_icon_helper.dart';
@@ -47,9 +49,10 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
       curve: Curves.elasticOut,
     );
 
-    _tiltAnimation = Tween<double>(begin: -0.06, end: -0.02).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOut),
-    );
+    _tiltAnimation = Tween<double>(
+      begin: -0.06,
+      end: -0.02,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
 
     _animController.forward();
   }
@@ -65,9 +68,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
     setState(() => _isSharing = true);
 
     try {
-      final imageBytes = await _screenshotController.capture(
-        pixelRatio: 2.0,
-      );
+      final imageBytes = await _screenshotController.capture(pixelRatio: 2.0);
 
       if (imageBytes != null) {
         final tempDir = Directory.systemTemp;
@@ -77,7 +78,8 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
         await SharePlus.instance.share(
           ShareParams(
             files: [XFile(file.path)],
-            text: 'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
+            text:
+                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
           ),
         );
       }
@@ -103,14 +105,20 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
             child: Center(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Discovery Banner Tag (First Find vs Duplicate)
                       if (widget.isFirstDiscovery)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.amberAccent,
                             borderRadius: BorderRadius.circular(16),
@@ -125,7 +133,11 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.auto_awesome, color: Colors.black87, size: 16),
+                              Icon(
+                                Icons.auto_awesome,
+                                color: Colors.black87,
+                                size: 16,
+                              ),
                               SizedBox(width: 6),
                               Text(
                                 'NEW DISCOVERY!',
@@ -141,7 +153,10 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white12,
                             borderRadius: BorderRadius.circular(16),
@@ -150,7 +165,11 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 14),
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                color: Colors.white70,
+                                size: 14,
+                              ),
                               SizedBox(width: 6),
                               Text(
                                 'LOGGED JUNK (DUPLICATE)',
@@ -173,7 +192,8 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                           width: 320,
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFAF7F2), // Vintage photographic paper
+                            color: const Color(0xFFFAF7F2),
+                            // Vintage photographic paper
                             borderRadius: BorderRadius.circular(6),
                             boxShadow: [
                               BoxShadow(
@@ -217,7 +237,9 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: rarityColor.withValues(alpha: 0.5),
+                                              color: rarityColor.withValues(
+                                                alpha: 0.5,
+                                              ),
                                               blurRadius: 40,
                                               spreadRadius: 10,
                                             ),
@@ -243,11 +265,18 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                                       top: 8,
                                       right: 8,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.black87,
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(color: Colors.white24),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.white24,
+                                          ),
                                         ),
                                         child: Text(
                                           item.collectionTag,
@@ -266,10 +295,15 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                                       left: 8,
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.place, size: 12, color: Colors.white70),
+                                          const Icon(
+                                            Icons.place,
+                                            size: 12,
+                                            color: Colors.white70,
+                                          ),
                                           const SizedBox(width: 3),
                                           Text(
-                                            widget.location?.name ?? 'Rusty Scrapyard',
+                                            widget.location?.name ??
+                                                'Rusty Scrapyard',
                                             style: const TextStyle(
                                               color: Colors.white70,
                                               fontSize: 10,
@@ -328,11 +362,16 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
 
                               // Estimated Sell Value Stamp
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.monetization_on, color: Colors.amber, size: 18),
+                                      const Icon(
+                                        Icons.monetization_on,
+                                        color: Colors.amber,
+                                        size: 18,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Est. Value: ${item.estimatedValue}',
@@ -373,8 +412,13 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2A9D8F),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 4,
                             ),
                           ),
@@ -388,8 +432,13 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE76F51),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 4,
                             ),
                           ),

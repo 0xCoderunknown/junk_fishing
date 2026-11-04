@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../engine/loot_engine.dart';
 import '../models/collection.dart';
 import '../models/item.dart';
@@ -9,7 +11,9 @@ import '../models/player_state.dart';
 
 class GameDataService {
   static final GameDataService _instance = GameDataService._internal();
+
   factory GameDataService() => _instance;
+
   GameDataService._internal();
 
   static const String _playerPrefsKey = 'junk_fishing_player_state_v1';
@@ -28,12 +32,17 @@ class GameDataService {
   bool _isLoaded = false;
 
   List<Location> get locations => List.unmodifiable(_locations);
+
   List<Item> get items => List.unmodifiable(_items);
+
   List<Collection> get collections => List.unmodifiable(_collections);
+
   PlayerState get playerState => _playerState;
+
   bool get isLoaded => _isLoaded;
 
-  Location? get currentLocation => _locationMap[_playerState.currentLocationId] ??
+  Location? get currentLocation =>
+      _locationMap[_playerState.currentLocationId] ??
       (_locations.isNotEmpty ? _locations.first : null);
 
   /// Load all game data from local JSON assets and player state from SharedPreferences.
@@ -42,7 +51,9 @@ class GameDataService {
 
     try {
       // 1. Load Locations
-      final locationsString = await rootBundle.loadString('assets/data/locations.json');
+      final locationsString = await rootBundle.loadString(
+        'assets/data/locations.json',
+      );
       final locationsJson = jsonDecode(locationsString) as List<dynamic>;
       _locations.clear();
       _locationMap.clear();
@@ -64,7 +75,9 @@ class GameDataService {
       }
 
       // 3. Load Collections
-      final collectionsString = await rootBundle.loadString('assets/data/collections.json');
+      final collectionsString = await rootBundle.loadString(
+        'assets/data/collections.json',
+      );
       final collectionsJson = jsonDecode(collectionsString) as List<dynamic>;
       _collections.clear();
       _collectionMap.clear();
@@ -111,7 +124,9 @@ class GameDataService {
   }
 
   Item? getItemById(String id) => _itemMap[id];
+
   Location? getLocationById(String id) => _locationMap[id];
+
   Collection? getCollectionById(String id) => _collectionMap[id];
 
   /// Checks if a location is unlocked for the player.
@@ -139,7 +154,8 @@ class GameDataService {
 
   /// Set the active fishing location.
   Future<void> selectLocation(String locationId) async {
-    if (_locationMap.containsKey(locationId) && isLocationUnlocked(locationId)) {
+    if (_locationMap.containsKey(locationId) &&
+        isLocationUnlocked(locationId)) {
       _playerState = _playerState.copyWith(currentLocationId: locationId);
       await _savePlayerState();
     }
@@ -170,7 +186,8 @@ class GameDataService {
     if (!_playerState.hasStorageSpace) return false;
 
     final updatedInventory = List<Item>.from(_playerState.inventory)..add(item);
-    final updatedDiscovered = Set<String>.from(_playerState.discoveredItemIds)..add(item.id);
+    final updatedDiscovered = Set<String>.from(_playerState.discoveredItemIds)
+      ..add(item.id);
 
     _playerState = _playerState.copyWith(
       inventory: updatedInventory,
@@ -187,7 +204,8 @@ class GameDataService {
     if (fromInventory) {
       updatedInventory.remove(item);
     }
-    final updatedDiscovered = Set<String>.from(_playerState.discoveredItemIds)..add(item.id);
+    final updatedDiscovered = Set<String>.from(_playerState.discoveredItemIds)
+      ..add(item.id);
 
     _playerState = _playerState.copyWith(
       money: _playerState.money + value,
@@ -206,7 +224,8 @@ class GameDataService {
     if (_playerState.claimedCollectionIds.contains(collectionId)) return false;
     if (!collection.isComplete(_playerState.discoveredItemIds)) return false;
 
-    final updatedClaimed = Set<String>.from(_playerState.claimedCollectionIds)..add(collectionId);
+    final updatedClaimed = Set<String>.from(_playerState.claimedCollectionIds)
+      ..add(collectionId);
 
     _playerState = _playerState.copyWith(
       money: _playerState.money + collection.rewardMoney,

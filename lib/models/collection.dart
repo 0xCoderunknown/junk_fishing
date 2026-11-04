@@ -19,7 +19,8 @@ class Collection {
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       rewardMoney: (json['rewardMoney'] as num?)?.toInt() ?? 500,
-      itemIds: (json['itemIds'] as List<dynamic>?)
+      itemIds:
+          (json['itemIds'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],

@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../models/item.dart';
 import '../models/location.dart';
 
@@ -75,8 +76,10 @@ class LootEngine {
       return MapEntry(item, baseWeight);
     }).toList();
 
-    final totalWeight =
-        weightedPool.fold<double>(0.0, (sum, entry) => sum + entry.value);
+    final totalWeight = weightedPool.fold<double>(
+      0.0,
+      (sum, entry) => sum + entry.value,
+    );
     final roll = _rng.nextDouble() * totalWeight;
 
     double cumulative = 0.0;

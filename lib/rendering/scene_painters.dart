@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// Renders the surrounding woodland clearing: mossy ground, boulders, dirt path, and trees.
@@ -43,25 +44,56 @@ class EnvironmentPainter extends CustomPainter {
 
     // 3. Foliage silhouettes in corners
     final leafPaint = Paint()..color = const Color(0xFF1B2A1E);
-    canvas.drawCircle(Offset(size.width * 0.95, size.height * 0.15), 110, leafPaint);
-    canvas.drawCircle(Offset(size.width * 0.82, size.height * 0.22), 70, leafPaint);
+    canvas.drawCircle(
+      Offset(size.width * 0.95, size.height * 0.15),
+      110,
+      leafPaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.82, size.height * 0.22),
+      70,
+      leafPaint,
+    );
 
     // 4. Boulders on top-left
     final rockPaint = Paint()..color = const Color(0xFF2F353B);
     final rockHighlight = Paint()..color = const Color(0xFF474E56);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.22, size.height * 0.25), width: 95, height: 65),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.22, size.height * 0.25),
+        width: 95,
+        height: 65,
+      ),
       rockPaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(size.width * 0.20, size.height * 0.23), width: 75, height: 45),
+      Rect.fromCenter(
+        center: Offset(size.width * 0.20, size.height * 0.23),
+        width: 75,
+        height: 45,
+      ),
       rockHighlight,
     );
 
     // Small pebbles
-    canvas.drawCircle(Offset(holeCenter.dx - holeRadiusX * 1.3, holeCenter.dy + 40), 9, rockPaint);
-    canvas.drawCircle(Offset(holeCenter.dx + holeRadiusX * 0.9, holeCenter.dy + holeRadiusY + 18), 12, rockPaint);
-    canvas.drawCircle(Offset(holeCenter.dx - 40, holeCenter.dy + holeRadiusY + 25), 8, rockPaint);
+    canvas.drawCircle(
+      Offset(holeCenter.dx - holeRadiusX * 1.3, holeCenter.dy + 40),
+      9,
+      rockPaint,
+    );
+    canvas.drawCircle(
+      Offset(
+        holeCenter.dx + holeRadiusX * 0.9,
+        holeCenter.dy + holeRadiusY + 18,
+      ),
+      12,
+      rockPaint,
+    );
+    canvas.drawCircle(
+      Offset(holeCenter.dx - 40, holeCenter.dy + holeRadiusY + 25),
+      8,
+      rockPaint,
+    );
   }
 
   @override
@@ -96,7 +128,11 @@ class LanternLightingPainter extends CustomPainter {
 
     // 2. Lantern housing & roof
     canvas.drawRect(
-      Rect.fromCenter(center: Offset(lanternPos.dx, lanternPos.dy + 16), width: 22, height: 8),
+      Rect.fromCenter(
+        center: Offset(lanternPos.dx, lanternPos.dy + 16),
+        width: 22,
+        height: 8,
+      ),
       woodPaint,
     );
     final roofPath = Path();
@@ -109,11 +145,7 @@ class LanternLightingPainter extends CustomPainter {
     // 3. Glowing Glass Core
     final glassPaint = Paint()
       ..shader = RadialGradient(
-        colors: const [
-          Color(0xFFFFF3B0),
-          Color(0xFFFF9E00),
-          Color(0xFFE85D04),
-        ],
+        colors: const [Color(0xFFFFF3B0), Color(0xFFFF9E00), Color(0xFFE85D04)],
       ).createShader(Rect.fromCircle(center: lanternPos, radius: 14));
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -181,7 +213,11 @@ class FishingHolePainter extends CustomPainter {
       );
 
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(stoneCenter.dx, stoneCenter.dy + 3), width: 24, height: 16),
+        Rect.fromCenter(
+          center: Offset(stoneCenter.dx, stoneCenter.dy + 3),
+          width: 24,
+          height: 16,
+        ),
         stoneShadowPaint,
       );
       canvas.drawOval(
@@ -189,13 +225,21 @@ class FishingHolePainter extends CustomPainter {
         stoneRingPaint,
       );
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(stoneCenter.dx, stoneCenter.dy - 2), width: 17, height: 10),
+        Rect.fromCenter(
+          center: Offset(stoneCenter.dx, stoneCenter.dy - 2),
+          width: 17,
+          height: 10,
+        ),
         stoneTopPaint,
       );
     }
 
     // 2. Interior well depth
-    final pitRect = Rect.fromCenter(center: center, width: rx * 2, height: ry * 2);
+    final pitRect = Rect.fromCenter(
+      center: center,
+      width: rx * 2,
+      height: ry * 2,
+    );
     canvas.drawOval(pitRect, Paint()..color = const Color(0xFF07131B));
 
     // 3. Water surface inside stone well
@@ -272,7 +316,11 @@ class FishermanPainter extends CustomPainter {
 
     // Soft drop shadow
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(pos.dx, pos.dy + 38), width: 44, height: 20),
+      Rect.fromCenter(
+        center: Offset(pos.dx, pos.dy + 38),
+        width: 44,
+        height: 20,
+      ),
       Paint()..color = Colors.black.withValues(alpha: 0.45),
     );
 
@@ -280,14 +328,22 @@ class FishermanPainter extends CustomPainter {
     final bootPaint = Paint()..color = const Color(0xFF1E252B);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(pos.dx - 8, pos.dy + 28), width: 12, height: 16),
+        Rect.fromCenter(
+          center: Offset(pos.dx - 8, pos.dy + 28),
+          width: 12,
+          height: 16,
+        ),
         const Radius.circular(4),
       ),
       bootPaint,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(pos.dx + 8, pos.dy + 28), width: 12, height: 16),
+        Rect.fromCenter(
+          center: Offset(pos.dx + 8, pos.dy + 28),
+          width: 12,
+          height: 16,
+        ),
         const Radius.circular(4),
       ),
       bootPaint,
@@ -297,21 +353,37 @@ class FishermanPainter extends CustomPainter {
     final vestPaint = Paint()..color = const Color(0xFFC84B31);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset(pos.dx, pos.dy + 6), width: 28, height: 32),
+        Rect.fromCenter(
+          center: Offset(pos.dx, pos.dy + 6),
+          width: 28,
+          height: 32,
+        ),
         const Radius.circular(8),
       ),
       vestPaint,
     );
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(pos.dx - 12, pos.dy + 4), width: 14, height: 24),
+      Rect.fromCenter(
+        center: Offset(pos.dx - 12, pos.dy + 4),
+        width: 14,
+        height: 24,
+      ),
       Paint()..color = const Color(0xFF9D3420),
     );
 
     // Head, Hair & Beanie
     final skinPaint = Paint()..color = const Color(0xFFFFD166);
     canvas.drawCircle(Offset(pos.dx + 6, pos.dy - 12), 6, skinPaint);
-    canvas.drawCircle(Offset(pos.dx, pos.dy - 16), 13, Paint()..color = const Color(0xFF222222));
-    canvas.drawCircle(Offset(pos.dx - 2, pos.dy - 18), 12, Paint()..color = const Color(0xFF343A40));
+    canvas.drawCircle(
+      Offset(pos.dx, pos.dy - 16),
+      13,
+      Paint()..color = const Color(0xFF222222),
+    );
+    canvas.drawCircle(
+      Offset(pos.dx - 2, pos.dy - 18),
+      12,
+      Paint()..color = const Color(0xFF343A40),
+    );
 
     // Fishing Rod
     final rodPaint = Paint()
@@ -336,7 +408,8 @@ class FishermanPainter extends CustomPainter {
     canvas.drawLine(rodTip, lineTarget, linePaint);
 
     // Bobber in water
-    final bobberPaint = Paint()..color = isPulling ? const Color(0xFFFF3366) : const Color(0xFFFF9E00);
+    final bobberPaint = Paint()
+      ..color = isPulling ? const Color(0xFFFF3366) : const Color(0xFFFF9E00);
     canvas.drawCircle(lineTarget, 5.5, bobberPaint);
     canvas.drawCircle(
       lineTarget,
@@ -351,4 +424,3 @@ class FishermanPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant FishermanPainter oldDelegate) => true;
 }
-
