@@ -7,7 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.2] - 2026-11-04
+
+### Changed (Ring Gameplay Refinements)
+- **Organic easing curves per motion phase** (`fishing_timing_engine.dart`):
+  - `teaseNibble` → `Curves.easeInOut`: ring decelerates into each waypoint and accelerates away — like a living creature cautiously circling the bait.
+  - `deepTease` → `Curves.decelerate`: dives in fast then creeps to a stop just outside orange. Maximum fake-out effect — the ring nearly tricks you into tapping.
+  - `strikeContraction` → `Curves.easeIn`: starts slow and accelerates as it closes — the fish commits, urgency builds.
+  - `retreat` → `Curves.easeOut`: snaps away fast then drifts off — the tension releases, the fish gets away.
+  - Duration of each phase is still calculated from constant-speed distance (~82 px/sec), so total cycle timing is predictable. Only the within-phase motion curve changes.
+- **Fishing line drawn from canvas top to hook** (`ripple_timing_overlay.dart`):
+  - A thin bezier-curved line is now painted from the top of the ring canvas down to the hook eyelet, giving the hook visual context and making the scene feel grounded.
+  - Line brightens and thickens slightly during the orange strike window.
+- **Breathing glow on outer ring** (`ripple_timing_overlay.dart`):
+  - Outer ring glow width slowly oscillates using a 1.8-second sine wave even when the ring isn't in a strike window, creating an ambient tension "pulse" that feels alive.
+  - Glow speed increases significantly during strike (strobe effect).
+- **Proximity color tint on outer ring** (`ripple_timing_overlay.dart`):
+  - Outer ring color continuously lerps from cyan → amber as the ring approaches the inner ring. At maximum distance it is pure `#90E0EF` (cyan). As it closes in, it warms toward `#FFB347` (amber), giving a visual early warning before orange.
+- **Independent bead rotation** (`ripple_timing_overlay.dart`):
+  - The 4 sparkle beads now orbit the outer ring at a constant angular velocity (full revolution every 3.5s), decoupled from ring radius. Previously they moved erratically as a function of `radius * 0.05`, which caused jitter.
+- **Strike strobe on inner ring** (`ripple_timing_overlay.dart`):
+  - Inner ring glow width and fill opacity strobe at ~5Hz during the orange window, creating an unmistakable urgent visual cue.
+- **Concentric water depth rings** (`ripple_timing_overlay.dart`):
+  - Two faint static ambient rings at 75px and 110px radius provide spatial depth cues, making the outer ring's position easier to judge.
+
+## [0.1.1] - 2026-11-04
+
+### Fixed (Gameplay Mechanics Audit)
+- **`_phaseStartTimeMs` sentinel changed from `0` to `-1`** (`fishing_timing_engine.dart`):
+  - Using `0` as a sentinel was unsafe because Unix epoch `0` is a theoretically valid timestamp. Changed to `-1` to eliminate any risk of a one-tick stale-frame calculation at phase boundaries. Guard in `update()` now checks `< 0` instead of `== 0`.
+- **Radius snaps to exact float target at phase completion** (`fishing_timing_engine.dart`):
+  - Added `_currentRadius = _targetRadius` snap when `progress >= 1.0` before advancing to the next phase, preventing tiny floating-point drift from accumulating across hundreds of phase transitions.
+- **`setState` guard in `RippleTimingOverlay._onTick`** (`ripple_timing_overlay.dart`):
+  - `setState` is now only called when radius actually changed (delta > 0.01px) or strike state flipped, eliminating hundreds of no-op rebuilds per second on idle frames.
+- **Haptic now uses `update()` return value** (`ripple_timing_overlay.dart`):
+  - Haptic on orange entry now uses the boolean returned by `engine.update()` (true exactly when orange state transitions on that frame) rather than a re-read of `isInOrangeStrikeWindow`. Guarantees the haptic fires precisely on the frame the ring turns orange, with no duplicate triggers.
+- **`LootEngine` timing bonus normalization** (`loot_engine.dart`):
+  - `timingBonus` is now explicitly normalized from accuracy range `[0.65 – 1.0]` to `[0.0 – 1.0]` before applying rarity weight bonuses. Previously, even a bare edge-tap (accuracy 0.65) received 65% of the maximum rarity bonus, making the bonus nearly constant. Now a perfect center tap (1.0) grants full bonus; an edge tap (0.65) grants zero.
+  - Changed weighted roll comparison from `roll <= cumulative` to `roll < cumulative` to correctly handle the floating-point edge case where `roll` exactly equals `totalWeight`.
+- **Clarified `strikeTolerance` as display-only** (`fishing_timing_engine.dart`):
+  - Added code comment clarifying `strikeTolerance` is not used in tap resolution (purely time-based), preventing future maintainers from treating it as a pixel-proximity gate.
+
+### Added (Tests)
+- **`engine_test.dart` expanded from 7 to 13 tests**:
+  - `After retreat phase engine automatically begins a new cycle` — engine perpetually recycles without finishing after missed strikes.
+  - `Radius snaps to exact target value at phase boundary` — large time jumps don't leave radius outside valid bounds.
+  - `LootEngine with timingBonus=0.0 uses base weights` — no-bonus catches return valid pool items.
+  - `LootEngine with perfect accuracy (1.0) still returns valid item` — high-bonus path works end-to-end.
+  - `LootEngine with minimum accuracy (0.65) grants no rarity bonus` — normalization verified: edge-tap accuracy is indistinguishable from zero bonus with identical RNG seed.
+  - `LootEngine returns fallback item when pool is empty` — empty location pool fallback branch covered.
+
 ## [0.1.0] - 2026-11-04
+
 
 ### Changed
 - **Precision Timing Accuracy Gradient**:

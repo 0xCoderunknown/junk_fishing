@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../engine/fishing_timing_engine.dart';
 
 typedef RippleResolveCallback = void Function(bool success, double accuracy);
@@ -10,13 +12,13 @@ typedef RippleResolveCallback = void Function(bool success, double accuracy);
 ///
 /// Driven directly by [FishingTimingEngine]:
 /// - Fixed inner ring (radius: 38px) with hook and bait.
-/// - Dynamic outer ring moves unpredictably with micro-nibbles, creeping crawls,
-///   and fake-outs before surging in.
+/// - Dynamic outer ring moves with organic easing curves (easeInOut / decelerate /
+///   easeIn / easeOut) depending on phase type for a living, creature-like feel.
 /// - When in strike window:
 ///   - Ring contacts inner circle and turns fiery ORANGE for ~500ms.
-///   - Haptic feedback fires.
-///   - Any tap while [isStrikeWindow] is true GUARANTEES a successful catch.
-///   - If missed, the ring smoothly opens back up and restarts a new unpredictable pattern.
+///   - Haptic feedback fires on the exact transition frame.
+///   - Any tap while orange GUARANTEES a successful catch.
+///   - If missed, ring snaps away fast then drifts (easeOut retreat).
 class RippleTimingOverlay extends StatefulWidget {
   final RippleResolveCallback onResolve;
   final double difficultyMultiplier;
@@ -36,12 +38,16 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
   late final AnimationController _animController;
   late final FishingTimingEngine _engine;
 
-  static const double innerRingRadius = FishingTimingEngine.innerRingRadius;
+  static const double _innerRingRadius = FishingTimingEngine.innerRingRadius;
 
   double _currentRadius = FishingTimingEngine.maxOuterRadius;
   bool _isStrikeWindow = false;
   bool _resolved = false;
   bool _hapticFired = false;
+
+  // Time tracking for visual effects (breathing glow, bead rotation)
+  int _animStartMs = -1;
+  int _animElapsedMs = 0;
 
   @override
   void initState() {
@@ -62,15 +68,20 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
     if (_resolved) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
-    _engine.update(now);
+    if (_animStartMs < 0) _animStartMs = now;
 
+    // update() returns true exactly when the orange state flips this frame.
+    final orangeStateChanged = _engine.update(now);
     final isOrange = _engine.isInOrangeStrikeWindow;
+
     setState(() {
       _currentRadius = _engine.currentRadius;
       _isStrikeWindow = isOrange;
+      _animElapsedMs = now - _animStartMs;
     });
 
-    if (isOrange && !_hapticFired) {
+    // Haptic fires exactly once per orange window entry (on the transition frame).
+    if (orangeStateChanged && isOrange && !_hapticFired) {
       _hapticFired = true;
       HapticFeedback.selectionClick();
     } else if (!isOrange) {
@@ -102,15 +113,13 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. Atmospheric blur overlay
+          // ── 1. Atmospheric blur overlay ───────────────────────────────────
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.60),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.60)),
           ),
 
-          // 2. Centered Timing Visuals
+          // ── 2. Centered Timing Visuals ────────────────────────────────────
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -118,14 +127,19 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                 // Top Status Badge
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: _isStrikeWindow
                         ? const Color(0xFFFF9E00).withValues(alpha: 0.3)
                         : Colors.black54,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: _isStrikeWindow ? const Color(0xFFFF9E00) : Colors.white24,
+                      color: _isStrikeWindow
+                          ? const Color(0xFFFF9E00)
+                          : Colors.white24,
                       width: _isStrikeWindow ? 2.5 : 1.5,
                     ),
                     boxShadow: [
@@ -141,15 +155,23 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _isStrikeWindow ? Icons.flash_on : Icons.remove_red_eye_outlined,
-                        color: _isStrikeWindow ? const Color(0xFFFFD166) : Colors.white70,
+                        _isStrikeWindow
+                            ? Icons.flash_on
+                            : Icons.remove_red_eye_outlined,
+                        color: _isStrikeWindow
+                            ? const Color(0xFFFFD166)
+                            : Colors.white70,
                         size: 16,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        _isStrikeWindow ? 'BITE! HOOK NOW!' : 'WATCH THE WATER...',
+                        _isStrikeWindow
+                            ? 'BITE! HOOK NOW!'
+                            : 'WATCH THE WATER...',
                         style: TextStyle(
-                          color: _isStrikeWindow ? const Color(0xFFFFD166) : Colors.white70,
+                          color: _isStrikeWindow
+                              ? const Color(0xFFFFD166)
+                              : Colors.white70,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.5,
                           fontSize: 13,
@@ -160,15 +182,16 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                 ),
                 const SizedBox(height: 36),
 
-                // Canvas showing the hook & outer ring
+                // Ring canvas — 300×300px. All effects driven by animElapsedMs.
                 SizedBox(
                   width: 300,
                   height: 300,
                   child: CustomPaint(
                     painter: _TorchlightRingPainter(
                       currentOuterRadius: _currentRadius,
-                      innerRadius: innerRingRadius,
+                      innerRadius: _innerRingRadius,
                       isInStrikeZone: _isStrikeWindow,
+                      animElapsedMs: _animElapsedMs,
                     ),
                   ),
                 ),
@@ -178,7 +201,10 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                 // Action Prompt
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 36,
+                    vertical: 15,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: _isStrikeWindow
@@ -189,7 +215,8 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     boxShadow: [
                       if (_isStrikeWindow)
                         BoxShadow(
-                          color: const Color(0xFFFF5400).withValues(alpha: 0.65),
+                          color: const Color(0xFFFF5400)
+                              .withValues(alpha: 0.65),
                           blurRadius: 22,
                           spreadRadius: 3,
                         ),
@@ -205,9 +232,13 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        _isStrikeWindow ? 'CLICK ANYWHERE!' : 'WAIT FOR ORANGE...',
+                        _isStrikeWindow
+                            ? 'CLICK ANYWHERE!'
+                            : 'WAIT FOR ORANGE...',
                         style: TextStyle(
-                          color: _isStrikeWindow ? Colors.white : Colors.white60,
+                          color: _isStrikeWindow
+                              ? Colors.white
+                              : Colors.white60,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2,
                           fontSize: 16,
@@ -234,76 +265,177 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
   }
 }
 
+/// Painter for the Torchlight ring mechanic with organic visual effects.
+///
+/// Effects driven by [animElapsedMs]:
+/// - Breathing glow: outer ring glow width pulses with a slow sine wave.
+/// - Bead rotation: 4 sparkle beads orbit at constant angular velocity.
+/// - Proximity tint: outer ring warms from cyan → amber as it nears the inner ring.
+/// - Strike strobe: fast sine pulse on inner ring during orange window.
+/// - Fishing line: thin line from canvas top → hook center.
+/// - Water depth: 2 faint concentric ambient rings for spatial depth.
 class _TorchlightRingPainter extends CustomPainter {
   final double currentOuterRadius;
   final double innerRadius;
   final bool isInStrikeZone;
+  final int animElapsedMs;
 
   _TorchlightRingPainter({
     required this.currentOuterRadius,
     required this.innerRadius,
     required this.isInStrikeZone,
+    required this.animElapsedMs,
   });
+
+  // Proximity factor: 0.0 when outer ring is at max, 1.0 when at inner ring.
+  double get _proximityFactor {
+    const travel =
+        FishingTimingEngine.maxOuterRadius -
+        FishingTimingEngine.innerRingRadius;
+    final dist = currentOuterRadius - FishingTimingEngine.innerRingRadius;
+    return (1.0 - (dist / travel)).clamp(0.0, 1.0);
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
+    final tMs = animElapsedMs.toDouble();
 
-    // 1. Water ripple background
-    final ambientWaterPaint = Paint()
-      ..color = const Color(0xFF0077B6).withValues(alpha: 0.12)
+    // ── Pre-compute time-based animation values ───────────────────────────
+    // Slow breathing pulse: period ~1.8s. Output: -1 → +1.
+    final breathSin = sin(tMs / 1800.0 * 2 * pi);
+    // Bead rotation: full revolution every 3.5s.
+    final beadAngle = (tMs / 3500.0) * 2 * pi;
+    // Strike strobe: fast pulse ~5Hz during orange window.
+    final strobeSin = isInStrikeZone ? sin(tMs / 200.0 * 2 * pi) : 0.0;
+
+    // ── 1. Fishing line (from top of canvas down to hook eyelet) ──────────
+    final lineTopY = 0.0;
+    final lineEndY = center.dy - 14; // hook eyelet
+    final linePaint = Paint()
+      ..color = Colors.white.withValues(alpha: isInStrikeZone ? 0.55 : 0.28)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = isInStrikeZone ? 1.8 : 1.2
+      ..strokeCap = StrokeCap.round;
+    // Slight sag — draw as a gentle curve (quadratic bezier)
+    final linePath = Path()
+      ..moveTo(center.dx, lineTopY)
+      ..quadraticBezierTo(
+        center.dx + (isInStrikeZone ? 4 : 2), // subtle sag
+        (lineEndY + lineTopY) / 2,
+        center.dx,
+        lineEndY,
+      );
+    canvas.drawPath(linePath, linePaint);
+
+    // ── 2. Water depth — ambient concentric rings ─────────────────────────
+    final depthPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    for (final r in [75.0, 110.0]) {
+      depthPaint.color = const Color(0xFF0077B6).withValues(alpha: 0.08);
+      canvas.drawCircle(center, r, depthPaint);
+    }
+
+    // ── 3. Water fill background ──────────────────────────────────────────
+    final waterPaint = Paint()
+      ..color = const Color(0xFF0077B6).withValues(alpha: 0.10)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, 120, ambientWaterPaint);
+    canvas.drawCircle(center, 118, waterPaint);
 
-    // 2. Inner Ring & Center Bait Target
+    // ── 4. Inner ring ─────────────────────────────────────────────────────
+    // During strike: glow strobe pulses the fill opacity.
+    final innerFillAlpha = isInStrikeZone
+        ? (0.30 + strobeSin * 0.12).clamp(0.18, 0.45)
+        : 0.35;
     final innerBgPaint = Paint()
       ..color = isInStrikeZone
-          ? const Color(0xFFFF9E00).withValues(alpha: 0.35)
-          : const Color(0xFF0F4C81).withValues(alpha: 0.40)
+          ? const Color(0xFFFF9E00).withValues(alpha: innerFillAlpha)
+          : const Color(0xFF0F4C81).withValues(alpha: 0.38)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, innerRadius, innerBgPaint);
 
     final innerBorderPaint = Paint()
-      ..color = isInStrikeZone ? const Color(0xFFFF9E00) : const Color(0xFF00E5FF)
+      ..color = isInStrikeZone
+          ? const Color(0xFFFF9E00)
+          : const Color(0xFF00E5FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = isInStrikeZone ? 3.8 : 2.0;
     canvas.drawCircle(center, innerRadius, innerBorderPaint);
 
+    // Inner glow — strobe during strike
+    final innerGlowWidth = isInStrikeZone
+        ? (12.0 + strobeSin * 4.0).clamp(8.0, 16.0)
+        : 4.0;
+    final innerGlowAlpha = isInStrikeZone
+        ? (0.60 + strobeSin * 0.15).clamp(0.45, 0.80)
+        : 0.18;
     final innerGlowPaint = Paint()
-      ..color = (isInStrikeZone ? const Color(0xFFFF9E00) : const Color(0xFF00E5FF))
-          .withValues(alpha: isInStrikeZone ? 0.65 : 0.2)
+      ..color =
+          (isInStrikeZone ? const Color(0xFFFF9E00) : const Color(0xFF00E5FF))
+              .withValues(alpha: innerGlowAlpha)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = isInStrikeZone ? 12.0 : 4.0;
+      ..strokeWidth = innerGlowWidth;
     canvas.drawCircle(center, innerRadius, innerGlowPaint);
 
-    // Central Bait / Hook Icon
+    // Central hook & bait
     _drawBaitHook(canvas, center, isInStrikeZone);
 
-    // 3. Dynamic Outer Ring: ORANGE when in strike, CYAN when teasing
-    final outerRingColor =
-        isInStrikeZone ? const Color(0xFFFF5400) : const Color(0xFF90E0EF);
+    // ── 5. Dynamic outer ring ─────────────────────────────────────────────
+    // Proximity tint: lerp outer ring color cyan → amber as ring closes in.
+    // At max distance: pure cyan. At inner ring: full amber (like strike color).
+    final p = _proximityFactor;
+    final Color outerRingColor;
+    if (isInStrikeZone) {
+      outerRingColor = const Color(0xFFFF5400);
+    } else {
+      // Lerp cyan (0xFF90E0EF) → amber (0xFFFFB347) based on proximity
+      outerRingColor = Color.lerp(
+        const Color(0xFF90E0EF),
+        const Color(0xFFFFB347),
+        p,
+      )!;
+    }
 
+    // Breathing glow: width oscillates with slow sine wave
+    final breathingGlowWidth = isInStrikeZone
+        ? (15.0 + strobeSin * 4.0).clamp(10.0, 20.0)
+        : (7.0 + breathSin * 2.5).clamp(4.5, 9.5);
+    final breathingGlowAlpha = isInStrikeZone
+        ? (0.72 + strobeSin * 0.12).clamp(0.55, 0.88)
+        : (0.28 + breathSin * 0.08 + p * 0.15).clamp(0.18, 0.55);
+
+    // Outer glow (drawn first, behind solid ring)
+    final outerGlowPaint = Paint()
+      ..color = outerRingColor.withValues(alpha: breathingGlowAlpha)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = breathingGlowWidth;
+    canvas.drawCircle(center, currentOuterRadius, outerGlowPaint);
+
+    // Outer solid ring
+    final outerStrokeWidth = isInStrikeZone
+        ? 5.2
+        : (3.0 + p * 1.5); // slightly thicker when near inner ring
     final outerRingPaint = Paint()
       ..color = outerRingColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = isInStrikeZone ? 5.2 : 3.0;
+      ..strokeWidth = outerStrokeWidth;
     canvas.drawCircle(center, currentOuterRadius, outerRingPaint);
 
-    final outerGlowPaint = Paint()
-      ..color = outerRingColor.withValues(alpha: isInStrikeZone ? 0.75 : 0.35)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = isInStrikeZone ? 15.0 : 7.0;
-    canvas.drawCircle(center, currentOuterRadius, outerGlowPaint);
-
-    // Orbiting sparkle beads
+    // ── 6. Orbiting sparkle beads ─────────────────────────────────────────
+    // 4 beads at 90° intervals, rotating at constant angular velocity.
+    // Size and color inherit from outer ring (proximity-tinted).
     final beadPaint = Paint()
       ..color = outerRingColor
       ..style = PaintingStyle.fill;
+    final beadSize = isInStrikeZone
+        ? (4.5 + strobeSin * 0.8).clamp(3.5, 5.5)
+        : 2.5;
     for (int i = 0; i < 4; i++) {
-      final angle = (i * pi / 2) + (currentOuterRadius * 0.05);
+      final angle = beadAngle + (i * pi / 2);
       final bx = center.dx + cos(angle) * currentOuterRadius;
       final by = center.dy + sin(angle) * currentOuterRadius;
-      canvas.drawCircle(Offset(bx, by), isInStrikeZone ? 4.5 : 2.5, beadPaint);
+      canvas.drawCircle(Offset(bx, by), beadSize, beadPaint);
     }
   }
 
@@ -332,7 +464,10 @@ class _TorchlightRingPainter extends CustomPainter {
     );
 
     // Curved barb
-    final arcRect = Rect.fromCircle(center: Offset(center.dx - 6, center.dy + 4), radius: 6);
+    final arcRect = Rect.fromCircle(
+      center: Offset(center.dx - 6, center.dy + 4),
+      radius: 6,
+    );
     canvas.drawArc(arcRect, 0, pi, false, hookPaint);
 
     // Upward barb point
@@ -351,7 +486,7 @@ class _TorchlightRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TorchlightRingPainter oldDelegate) {
-    return oldDelegate.currentOuterRadius != currentOuterRadius ||
-        oldDelegate.isInStrikeZone != isInStrikeZone;
+    // Always repaint: animElapsedMs advances every frame for breathing/rotation.
+    return true;
   }
 }

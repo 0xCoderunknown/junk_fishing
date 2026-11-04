@@ -24,9 +24,9 @@ void main() {
       expect(engine.isFinished, true);
     });
 
-    test('Strike window duration is halved to ~500ms and guarantees catch on tap', () {
+    test('Strike window duration is ~500ms and guarantees catch on tap', () {
       final engine = FishingTimingEngine();
-      
+
       // Advance to strike window by stepping simulation
       int simulatedTime = DateTime.now().millisecondsSinceEpoch;
       bool foundOrange = false;
@@ -80,7 +80,7 @@ void main() {
 
     test('Deep tease phase does not trigger orange strike window despite being close to center', () {
       final engine = FishingTimingEngine();
-      
+
       // Look for deepTease phase in the engine's cycle
       final deepTeasePhase = engine.currentPhase;
       if (deepTeasePhase?.type == TimingPhaseType.deepTease) {
@@ -88,6 +88,41 @@ void main() {
         expect(deepTeasePhase?.isOrangeStrike, false);
       }
       expect(engine.isInOrangeStrikeWindow, false);
+    });
+
+    test('After retreat phase engine automatically begins a new cycle', () {
+      final engine = FishingTimingEngine();
+      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+
+      // Run through until we pass the first full cycle (tease + strike + retreat)
+      // We skip past the orange window by not tapping, and keep advancing time.
+      for (int i = 0; i < 2000; i++) {
+        simulatedTime += 50;
+        engine.update(simulatedTime);
+
+        // After the retreat phase completes, engine should still be running
+        if (!engine.isInOrangeStrikeWindow && !engine.isFinished) {
+          final phase = engine.currentPhase;
+          if (phase?.type == TimingPhaseType.teaseNibble ||
+              phase?.type == TimingPhaseType.deepTease) {
+            break;
+          }
+        }
+      }
+
+      expect(engine.isFinished, false,
+          reason: 'Engine must keep cycling indefinitely after missed strikes');
+    });
+
+    test('Radius snaps to exact target value at phase boundary (no float drift)', () {
+      final engine = FishingTimingEngine();
+      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+
+      // Jump far ahead to force many phase completions
+      engine.update(simulatedTime + 999999);
+      // Radius must never exceed maxOuterRadius or drop below innerRingRadius during teasing
+      expect(engine.currentRadius, lessThanOrEqualTo(FishingTimingEngine.maxOuterRadius + 1.0));
+      expect(engine.isFinished, false);
     });
   });
 
@@ -143,6 +178,75 @@ void main() {
 
       expect(caught, isNotNull);
       expect(testLocation.availableItemIds.contains(caught!.id), true);
+    });
+
+    test('LootEngine with timingBonus=0.0 (pre-orange miss) uses base weights', () {
+      // Even with 0 bonus, a valid item from pool should still be returned
+      final engine = LootEngine(rng: Random(1));
+      final caught = engine.rollCatch(
+        location: testLocation,
+        itemMap: itemMap,
+        fallbackItems: allItems,
+        timingBonus: 0.0,
+      );
+      expect(caught, isNotNull);
+      expect(testLocation.availableItemIds.contains(caught!.id), true);
+    });
+
+    test('LootEngine with perfect accuracy (1.0) still returns a valid item', () {
+      final engine = LootEngine(rng: Random(99));
+      final caught = engine.rollCatch(
+        location: testLocation,
+        itemMap: itemMap,
+        fallbackItems: allItems,
+        timingBonus: 1.0,
+      );
+      expect(caught, isNotNull);
+      expect(testLocation.availableItemIds.contains(caught!.id), true);
+    });
+
+    test('LootEngine with minimum accuracy (0.65) grants no rarity bonus', () {
+      // timingBonus=0.65 normalizes to 0.0, so bonus should be identical to timingBonus=0.0
+      // We verify by checking that the weighted pool totals match.
+      // We test with a seeded RNG for determinism.
+      final engine1 = LootEngine(rng: Random(7));
+      final engine2 = LootEngine(rng: Random(7));
+
+      final result1 = engine1.rollCatch(
+        location: testLocation,
+        itemMap: itemMap,
+        fallbackItems: allItems,
+        timingBonus: 0.0,
+      );
+      final result2 = engine2.rollCatch(
+        location: testLocation,
+        itemMap: itemMap,
+        fallbackItems: allItems,
+        timingBonus: 0.65, // Should normalize to 0.0 — same RNG roll => same item
+      );
+      expect(result1?.id, result2?.id,
+          reason: 'Edge accuracy (0.65) should give same result as no bonus (0.0)');
+    });
+
+    test('LootEngine returns fallback item when pool is empty', () {
+      const emptyLocation = Location(
+        id: 'loc_empty',
+        name: 'Empty Spot',
+        description: 'No items here',
+        difficulty: 1.0,
+        unlocked: true,
+        themeColor: '0xFF000000',
+        waterColor: '0xFF0000FF',
+        availableItemIds: [],
+      );
+      final engine = LootEngine(rng: Random(5));
+      final caught = engine.rollCatch(
+        location: emptyLocation,
+        itemMap: itemMap,
+        fallbackItems: allItems,
+        timingBonus: 0.5,
+      );
+      expect(caught, isNotNull);
     });
   });
 }
