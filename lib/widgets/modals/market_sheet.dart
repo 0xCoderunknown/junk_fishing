@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/game_data_service.dart';
@@ -226,7 +226,7 @@ class _MarketSheetState extends State<MarketSheet> {
                             Text(
                               inventory.isEmpty
                                   ? 'Bag is currently empty'
-                                  : '${inventory.length} items worth 🪙 $scrapTotalValue coins',
+                                  : '${inventory.length} items worth ðŸª™ $scrapTotalValue coins',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.6),
                                 fontSize: 12,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'screens/main_fishing_screen.dart';
@@ -7,9 +7,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Set immersive orientation and system UI styles for Android gaming
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

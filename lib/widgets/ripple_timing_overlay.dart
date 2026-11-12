@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 import '../engine/fishing_timing_engine.dart';
@@ -113,7 +113,7 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── 1. Atmospheric blur overlay ───────────────────────────────────
+          // â”€â”€ 1. Atmospheric blur overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           RepaintBoundary(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 9, sigmaY: 9),
@@ -121,12 +121,12 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
             ),
           ),
 
-          // ── 2. Centered Timing Visuals ────────────────────────────────────
+          // â”€â”€ 2. Centered Timing Visuals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Ring canvas — 300×300px. All effects driven by animElapsedMs.
+                // Ring canvas â€” 300Ã—300px. All effects driven by animElapsedMs.
                 SizedBox(
                   width: 300,
                   height: 300,
@@ -165,7 +165,8 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                     boxShadow: [
                       if (_isStrikeWindow)
                         BoxShadow(
-                          color: const Color(0xFFFF5400).withValues(alpha: 0.65),
+                          color: const Color(0xFFFF5400)
+                              .withValues(alpha: 0.65),
                           blurRadius: 22,
                           spreadRadius: 3,
                         ),
@@ -183,7 +184,9 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
                       Text(
                         _isStrikeWindow ? 'STRIKE NOW!' : 'WAIT FOR STRIKE...',
                         style: TextStyle(
-                          color: _isStrikeWindow ? Colors.white : Colors.white60,
+                          color: _isStrikeWindow
+                              ? Colors.white
+                              : Colors.white60,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.8,
                           fontSize: 16,
@@ -206,9 +209,9 @@ class _RippleTimingOverlayState extends State<RippleTimingOverlay>
 /// Effects driven by [animElapsedMs]:
 /// - Breathing glow: outer ring glow width pulses with a slow sine wave.
 /// - Bead rotation: 4 sparkle beads orbit at constant angular velocity.
-/// - Proximity tint: outer ring warms from cyan → amber as it nears the inner ring.
+/// - Proximity tint: outer ring warms from cyan â†’ amber as it nears the inner ring.
 /// - Strike strobe: fast sine pulse on inner ring during orange window.
-/// - Fishing line: thin line from canvas top → hook center.
+/// - Fishing line: thin line from canvas top â†’ hook center.
 /// - Water depth: 2 faint concentric ambient rings for spatial depth.
 class _TorchlightRingPainter extends CustomPainter {
   final double currentOuterRadius;
@@ -237,15 +240,15 @@ class _TorchlightRingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final tMs = animElapsedMs.toDouble();
 
-    // ── Pre-compute time-based animation values ───────────────────────────
-    // Slow breathing pulse: period ~1.8s. Output: -1 → +1.
+    // â”€â”€ Pre-compute time-based animation values â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Slow breathing pulse: period ~1.8s. Output: -1 â†’ +1.
     final breathSin = sin(tMs / 1800.0 * 2 * pi);
     // Bead rotation: full revolution every 3.5s.
     final beadAngle = (tMs / 3500.0) * 2 * pi;
     // Strike strobe: fast pulse ~5Hz during orange window.
     final strobeSin = isInStrikeZone ? sin(tMs / 200.0 * 2 * pi) : 0.0;
 
-    // ── 1. Fishing line (from top of canvas down to hook eyelet) ──────────
+    // â”€â”€ 1. Fishing line (from top of canvas down to hook eyelet) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     final lineTopY = 0.0;
     final lineEndY = center.dy - 14; // hook eyelet
     final linePaint = Paint()
@@ -253,7 +256,7 @@ class _TorchlightRingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = isInStrikeZone ? 1.8 : 1.2
       ..strokeCap = StrokeCap.round;
-    // Slight sag — draw as a gentle curve (quadratic bezier)
+    // Slight sag â€” draw as a gentle curve (quadratic bezier)
     final linePath = Path()
       ..moveTo(center.dx, lineTopY)
       ..quadraticBezierTo(
@@ -264,7 +267,7 @@ class _TorchlightRingPainter extends CustomPainter {
       );
     canvas.drawPath(linePath, linePaint);
 
-    // ── 2. Water depth — ambient concentric rings ─────────────────────────
+    // â”€â”€ 2. Water depth â€” ambient concentric rings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     final depthPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
@@ -273,13 +276,13 @@ class _TorchlightRingPainter extends CustomPainter {
       canvas.drawCircle(center, r, depthPaint);
     }
 
-    // ── 3. Water fill background ──────────────────────────────────────────
+    // â”€â”€ 3. Water fill background â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     final waterPaint = Paint()
       ..color = const Color(0xFF0077B6).withValues(alpha: 0.10)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 118, waterPaint);
 
-    // ── 4. Inner ring ─────────────────────────────────────────────────────
+    // â”€â”€ 4. Inner ring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // During strike: glow strobe pulses the fill opacity.
     final innerFillAlpha = isInStrikeZone
         ? (0.30 + strobeSin * 0.12).clamp(0.18, 0.45)
@@ -299,7 +302,7 @@ class _TorchlightRingPainter extends CustomPainter {
       ..strokeWidth = isInStrikeZone ? 3.8 : 2.0;
     canvas.drawCircle(center, innerRadius, innerBorderPaint);
 
-    // Inner glow — strobe during strike
+    // Inner glow â€” strobe during strike
     final innerGlowWidth = isInStrikeZone
         ? (12.0 + strobeSin * 4.0).clamp(8.0, 16.0)
         : 4.0;
@@ -317,15 +320,15 @@ class _TorchlightRingPainter extends CustomPainter {
     // Central hook & bait
     _drawBaitHook(canvas, center, isInStrikeZone);
 
-    // ── 5. Dynamic outer ring ─────────────────────────────────────────────
-    // Proximity tint: lerp outer ring color cyan → amber as ring closes in.
+    // â”€â”€ 5. Dynamic outer ring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Proximity tint: lerp outer ring color cyan â†’ amber as ring closes in.
     // At max distance: pure cyan. At inner ring: full amber (like strike color).
     final p = _proximityFactor;
     final Color outerRingColor;
     if (isInStrikeZone) {
       outerRingColor = const Color(0xFFFF5400);
     } else {
-      // Lerp cyan (0xFF90E0EF) → amber (0xFFFFB347) based on proximity
+      // Lerp cyan (0xFF90E0EF) â†’ amber (0xFFFFB347) based on proximity
       outerRingColor = Color.lerp(
         const Color(0xFF90E0EF),
         const Color(0xFFFFB347),
@@ -358,8 +361,8 @@ class _TorchlightRingPainter extends CustomPainter {
       ..strokeWidth = outerStrokeWidth;
     canvas.drawCircle(center, currentOuterRadius, outerRingPaint);
 
-    // ── 6. Orbiting sparkle beads ─────────────────────────────────────────
-    // 4 beads at 90° intervals, rotating at constant angular velocity.
+    // â”€â”€ 6. Orbiting sparkle beads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // 4 beads at 90Â° intervals, rotating at constant angular velocity.
     // Size and color inherit from outer ring (proximity-tinted).
     final beadPaint = Paint()
       ..color = outerRingColor

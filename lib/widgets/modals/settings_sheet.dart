@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../services/game_data_service.dart';
 import 'game_bottom_sheet.dart';
@@ -112,7 +112,7 @@ class SettingsSheet extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text(
-              'Junk Fishing v0.1.3 • AI Built & Maintained',
+              'Junk Fishing v0.1.3 â€¢ AI Built & Maintained',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.35),
                 fontSize: 11,

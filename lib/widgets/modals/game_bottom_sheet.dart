@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Standard dark modal shell for all bottom sheets in Junk Fishing.
 ///

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Renders the surrounding woodland clearing: mossy ground, boulders, dirt path, and trees.
 class EnvironmentPainter extends CustomPainter {

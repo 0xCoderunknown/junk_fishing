@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
@@ -137,7 +137,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
           ShareParams(
             files: [XFile(file.path)],
             text:
-                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
+                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! ðŸŽ£ðŸ¤–',
           ),
         );
       }
@@ -187,425 +187,438 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
                 angle: currentRotation,
                 child: Center(
                   child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Discovery Banner Tag (First Find vs Duplicate)
-                      if (widget.isFirstDiscovery)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.amberAccent,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black45,
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Discovery Banner Tag (First Find vs Duplicate)
+                          if (widget.isFirstDiscovery)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
                               ),
-                            ],
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                color: Colors.black87,
-                                size: 16,
+                              decoration: BoxDecoration(
+                                color: Colors.amberAccent,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black45,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 3),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 6),
-                              Text(
-                                'NEW DISCOVERY!',
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 13,
-                                  letterSpacing: 1.5,
-                                ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.auto_awesome,
+                                    color: Colors.black87,
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'NEW DISCOVERY!',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 13,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white12,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white24),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.inventory_2_outlined,
-                                color: Colors.white70,
-                                size: 14,
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 5,
                               ),
-                              SizedBox(width: 6),
-                              Text(
-                                'LOGGED JUNK (DUPLICATE)',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
-                                  letterSpacing: 1.2,
-                                ),
+                              decoration: BoxDecoration(
+                                color: Colors.white12,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white24),
                               ),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(height: 12),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    color: Colors.white70,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'LOGGED JUNK (DUPLICATE)',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(height: 12),
 
-                      // Printable / Shareable Polaroid Frame
-                      Screenshot(
-                        controller: _screenshotController,
-                        child: Container(
-                          width: 320,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFAF7F2),
-                            // Vintage photographic paper
-                            borderRadius: BorderRadius.circular(6),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.65),
-                                blurRadius: 28,
-                                spreadRadius: 4,
-                                offset: const Offset(4, 12),
+                          // Printable / Shareable Polaroid Frame
+                          Screenshot(
+                            controller: _screenshotController,
+                            child: Container(
+                              width: 320,
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                16,
+                                16,
+                                24,
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Inner Photo Aperture
-                              Container(
-                                height: 210,
-                                decoration: BoxDecoration(
-                                  gradient: RadialGradient(
-                                    center: Alignment.center,
-                                    radius: 0.85,
-                                    colors: [
-                                      rarityColor.withValues(alpha: 0.35),
-                                      const Color(0xFF161922),
-                                      const Color(0xFF0F1117),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFAF7F2),
+                                // Vintage photographic paper
+                                borderRadius: BorderRadius.circular(6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.65),
+                                    blurRadius: 28,
+                                    spreadRadius: 4,
+                                    offset: const Offset(4, 12),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Inner Photo Aperture
+                                  Container(
+                                    height: 210,
+                                    decoration: BoxDecoration(
+                                      gradient: RadialGradient(
+                                        center: Alignment.center,
+                                        radius: 0.85,
+                                        colors: [
+                                          rarityColor.withValues(alpha: 0.35),
+                                          const Color(0xFF161922),
+                                          const Color(0xFF0F1117),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(
+                                        color: rarityColor.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        // Ambient Rarity Glow
+                                        Center(
+                                          child: Container(
+                                            width: 120,
+                                            height: 120,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: rarityColor.withValues(
+                                                    alpha: 0.5,
+                                                  ),
+                                                  blurRadius: 40,
+                                                  spreadRadius: 10,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Item Graphic Icon
+                                        Center(
+                                          child: Hero(
+                                            tag: 'item_${item.id}',
+                                            child: Icon(
+                                              getItemIconData(item.icon),
+                                              size: 88,
+                                              color: rarityColor,
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Top right collection badge
+                                        Positioned(
+                                          top: 8,
+                                          right: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black87,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: Colors.white24,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              item.collectionTag,
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Bottom left location badge
+                                        Positioned(
+                                          bottom: 8,
+                                          left: 8,
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.place,
+                                                size: 12,
+                                                color: Colors.white70,
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                widget.location?.name ??
+                                                    'Rusty Scrapyard',
+                                                style: const TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: 10,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 14),
+
+                                  // Polaroid handwritten-style Title & Stars
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.name,
+                                          style: const TextStyle(
+                                            fontFamily: 'serif',
+                                            fontSize: 19,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1E2024),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        item.rarityStars,
+                                        style: TextStyle(
+                                          color: rarityColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: rarityColor.withValues(alpha: 0.5),
-                                    width: 1.5,
+
+                                  const SizedBox(height: 8),
+
+                                  // Flavor Text
+                                  Text(
+                                    'â€œ${item.flavorText}â€',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                      color: Color(0xFF555555),
+                                      height: 1.35,
+                                    ),
                                   ),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    // Ambient Rarity Glow
-                                    Center(
-                                      child: Container(
-                                        width: 120,
-                                        height: 120,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: rarityColor.withValues(
-                                                alpha: 0.5,
-                                              ),
-                                              blurRadius: 40,
-                                              spreadRadius: 10,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
 
-                                    // Item Graphic Icon
-                                    Center(
-                                      child: Hero(
-                                        tag: 'item_${item.id}',
-                                        child: Icon(
-                                          getItemIconData(item.icon),
-                                          size: 88,
-                                          color: rarityColor,
-                                        ),
-                                      ),
-                                    ),
+                                  const SizedBox(height: 12),
 
-                                    // Top right collection badge
-                                    Positioned(
-                                      top: 8,
-                                      right: 8,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black87,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.white24,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          item.collectionTag,
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Bottom left location badge
-                                    Positioned(
-                                      bottom: 8,
-                                      left: 8,
-                                      child: Row(
+                                  // Estimated Sell Value Stamp
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
                                         children: [
                                           const Icon(
-                                            Icons.place,
-                                            size: 12,
-                                            color: Colors.white70,
+                                            Icons.monetization_on,
+                                            color: Colors.amber,
+                                            size: 18,
                                           ),
-                                          const SizedBox(width: 3),
+                                          const SizedBox(width: 4),
                                           Text(
-                                            widget.location?.name ??
-                                                'Rusty Scrapyard',
+                                            'Est. Value: ${item.estimatedValue}',
                                             style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 10,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF2C3E50),
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              // Polaroid handwritten-style Title & Stars
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      item.name,
-                                      style: const TextStyle(
-                                        fontFamily: 'serif',
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1E2024),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    item.rarityStars,
-                                    style: TextStyle(
-                                      color: rarityColor,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 8),
-
-                              // Flavor Text
-                              Text(
-                                '“${item.flavorText}”',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                  color: Color(0xFF555555),
-                                  height: 1.35,
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Estimated Sell Value Stamp
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.monetization_on,
-                                        color: Colors.amber,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 4),
                                       Text(
-                                        'Est. Value: ${item.estimatedValue}',
+                                        '${item.weightKg.toStringAsFixed(2)} kg',
                                         style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF2C3E50),
+                                          fontSize: 12,
+                                          color: Color(0xFF888888),
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ],
                                   ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Action Buttons Row: Keep, Sell, Share
+                          if (!_isExiting)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // KEEP BUTTON
+                                ElevatedButton.icon(
+                                  onPressed: _triggerKeep,
+                                  icon: const Icon(Icons.inventory_2, size: 18),
+                                  label: const Text('KEEP'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2A9D8F),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 4,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+
+                                // SELL BUTTON
+                                ElevatedButton.icon(
+                                  onPressed: _triggerSell,
+                                  icon: const Icon(
+                                    Icons.currency_exchange,
+                                    size: 18,
+                                  ),
+                                  label: Text('SELL (+${item.estimatedValue})'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFE76F51),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 4,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+
+                                // SHARE BUTTON
+                                IconButton.filled(
+                                  onPressed: _sharePolaroid,
+                                  icon: _isSharing
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.share, size: 20),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: const Color(0xFF264653),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.all(12),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _isSelling
+                                    ? Colors.amber
+                                    : const Color(0xFF2A9D8F),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _isSelling
+                                        ? Colors.orangeAccent
+                                        : Colors.tealAccent,
+                                    blurRadius: 18,
+                                    spreadRadius: 3,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _isSelling
+                                        ? Icons.monetization_on
+                                        : Icons.inventory_2,
+                                    color: _isSelling
+                                        ? Colors.black87
+                                        : Colors.white,
+                                    size: 22,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    '${item.weightKg.toStringAsFixed(2)} kg',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF888888),
-                                      fontWeight: FontWeight.w600,
+                                    _isSelling
+                                        ? '+${item.estimatedValue} COINS!'
+                                        : 'SAVED TO INVENTORY!',
+                                    style: TextStyle(
+                                      color: _isSelling
+                                          ? Colors.black87
+                                          : Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
+                            ),
+                        ],
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // Action Buttons Row: Keep, Sell, Share
-                      if (!_isExiting)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // KEEP BUTTON
-                            ElevatedButton.icon(
-                              onPressed: _triggerKeep,
-                              icon: const Icon(Icons.inventory_2, size: 18),
-                              label: const Text('KEEP'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2A9D8F),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 18,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 4,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-
-                            // SELL BUTTON
-                            ElevatedButton.icon(
-                              onPressed: _triggerSell,
-                              icon: const Icon(Icons.currency_exchange, size: 18),
-                              label: Text('SELL (+${item.estimatedValue})'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFE76F51),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 4,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-
-                            // SHARE BUTTON
-                            IconButton.filled(
-                              onPressed: _sharePolaroid,
-                              icon: _isSharing
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Icon(Icons.share, size: 20),
-                              style: IconButton.styleFrom(
-                                backgroundColor: const Color(0xFF264653),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.all(12),
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _isSelling
-                                ? Colors.amber
-                                : const Color(0xFF2A9D8F),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _isSelling
-                                    ? Colors.orangeAccent
-                                    : Colors.tealAccent,
-                                blurRadius: 18,
-                                spreadRadius: 3,
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _isSelling
-                                    ? Icons.monetization_on
-                                    : Icons.inventory_2,
-                                color: _isSelling ? Colors.black87 : Colors.white,
-                                size: 22,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _isSelling
-                                    ? '+${item.estimatedValue} COINS!'
-                                    : 'SAVED TO INVENTORY!',
-                                style: TextStyle(
-                                  color:
-                                      _isSelling ? Colors.black87 : Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 14,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
+        );
+      },
     );
   }
 }

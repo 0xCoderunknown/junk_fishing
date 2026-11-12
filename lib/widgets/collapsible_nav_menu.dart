@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../models/location.dart';
 import '../models/player_state.dart';
@@ -59,15 +59,13 @@ class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
       ),
     );
 
-    _badgeOffset = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(0, -22),
-    ).animate(
-      CurvedAnimation(
-        parent: _badgeController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _badgeOffset =
+        Tween<Offset>(
+          begin: const Offset(0, 0),
+          end: const Offset(0, -22),
+        ).animate(
+          CurvedAnimation(parent: _badgeController, curve: Curves.easeOutCubic),
+        );
   }
 
   @override
@@ -81,7 +79,8 @@ class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
       _badgeController.forward(from: 0.0);
     } else {
       final invDelta =
-          widget.playerState.inventory.length - oldWidget.playerState.inventory.length;
+          widget.playerState.inventory.length -
+          oldWidget.playerState.inventory.length;
       if (invDelta > 0) {
         _badgeText = '+$invDelta';
         _badgeIsCoins = false;
@@ -158,7 +157,9 @@ class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.amber,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           boxShadow: const [
                                             BoxShadow(
                                               color: Colors.orangeAccent,
@@ -223,7 +224,9 @@ class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
                                         ),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF2A9D8F),
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           boxShadow: const [
                                             BoxShadow(
                                               color: Colors.tealAccent,
@@ -381,7 +384,9 @@ class _CollapsibleNavMenuState extends State<CollapsibleNavMenu>
                   ),
                   child: Center(
                     child: Icon(
-                      widget.isCollapsed ? Icons.chevron_right : Icons.chevron_left,
+                      widget.isCollapsed
+                          ? Icons.chevron_right
+                          : Icons.chevron_left,
                       color: Colors.cyanAccent,
                       size: 20,
                     ),

@@ -74,7 +74,12 @@ void main() {
       expect(statusPartial.progress, 0.5);
       expect(statusPartial.isComplete, false);
 
-      final statusFull = collection.getStatus({'item_a', 'item_b', 'item_c', 'item_d'});
+      final statusFull = collection.getStatus({
+        'item_a',
+        'item_b',
+        'item_c',
+        'item_d',
+      });
       expect(statusFull.found, 4);
       expect(statusFull.isComplete, true);
     });
@@ -163,23 +168,26 @@ void main() {
       expect(getRarityColor(5), isNotNull);
     });
 
-    test('EasingCurves boundary and midpoint values are mathematically sound', () {
-      expect(EasingCurves.linear(0.0), 0.0);
-      expect(EasingCurves.linear(1.0), 1.0);
+    test(
+      'EasingCurves boundary and midpoint values are mathematically sound',
+      () {
+        expect(EasingCurves.linear(0.0), 0.0);
+        expect(EasingCurves.linear(1.0), 1.0);
 
-      expect(EasingCurves.easeInOut(0.0), 0.0);
-      expect(EasingCurves.easeInOut(0.5), 0.5);
-      expect(EasingCurves.easeInOut(1.0), 1.0);
+        expect(EasingCurves.easeInOut(0.0), 0.0);
+        expect(EasingCurves.easeInOut(0.5), 0.5);
+        expect(EasingCurves.easeInOut(1.0), 1.0);
 
-      expect(EasingCurves.easeIn(0.0), 0.0);
-      expect(EasingCurves.easeIn(1.0), 1.0);
+        expect(EasingCurves.easeIn(0.0), 0.0);
+        expect(EasingCurves.easeIn(1.0), 1.0);
 
-      expect(EasingCurves.easeOut(0.0), 0.0);
-      expect(EasingCurves.easeOut(1.0), 1.0);
+        expect(EasingCurves.easeOut(0.0), 0.0);
+        expect(EasingCurves.easeOut(1.0), 1.0);
 
-      expect(EasingCurves.decelerate(0.0), 0.0);
-      expect(EasingCurves.decelerate(1.0), 1.0);
-      expect(EasingCurves.decelerate(0.5), 0.75);
-    });
+        expect(EasingCurves.decelerate(0.0), 0.0);
+        expect(EasingCurves.decelerate(1.0), 1.0);
+        expect(EasingCurves.decelerate(0.5), 0.75);
+      },
+    );
   });
 }

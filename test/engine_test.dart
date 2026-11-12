@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:junk_fishing/engine/fishing_timing_engine.dart';
 import 'package:junk_fishing/engine/loot_engine.dart';
@@ -40,7 +41,11 @@ void main() {
         }
       }
 
-      expect(foundOrange, true, reason: 'Engine should reach orange strike window');
+      expect(
+        foundOrange,
+        true,
+        reason: 'Engine should reach orange strike window',
+      );
       expect(engine.currentPhase?.type, TimingPhaseType.strikeWindow);
       expect(engine.currentPhase?.durationMs, inInclusiveRange(400, 650));
 
@@ -50,33 +55,39 @@ void main() {
       expect(tapResult.accuracy, inInclusiveRange(0.65, 1.0));
     });
 
-    test('Strike window tap accuracy awards 1.0 at center and lower at edge', () {
-      final engine = FishingTimingEngine();
-      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+    test(
+      'Strike window tap accuracy awards 1.0 at center and lower at edge',
+      () {
+        final engine = FishingTimingEngine();
+        int simulatedTime = DateTime.now().millisecondsSinceEpoch;
 
-      for (int i = 0; i < 200; i++) {
-        simulatedTime += 40;
-        engine.update(simulatedTime);
-        if (engine.isInOrangeStrikeWindow) break;
-      }
+        for (int i = 0; i < 200; i++) {
+          simulatedTime += 40;
+          engine.update(simulatedTime);
+          if (engine.isInOrangeStrikeWindow) break;
+        }
 
-      final windowDuration = engine.currentPhase!.durationMs;
-      final centerTime = simulatedTime + (windowDuration ~/ 2);
-      final centerResult = engine.registerTap(centerTime);
-      expect(centerResult.success, true);
-      expect(centerResult.accuracy, closeTo(1.0, 0.05));
-    });
+        final windowDuration = engine.currentPhase!.durationMs;
+        final centerTime = simulatedTime + (windowDuration ~/ 2);
+        final centerResult = engine.registerTap(centerTime);
+        expect(centerResult.success, true);
+        expect(centerResult.accuracy, closeTo(1.0, 0.05));
+      },
+    );
 
-    test('Engine updates radius over time and recycles cycle without finish', () {
-      final engine = FishingTimingEngine();
-      final now = DateTime.now().millisecondsSinceEpoch;
+    test(
+      'Engine updates radius over time and recycles cycle without finish',
+      () {
+        final engine = FishingTimingEngine();
+        final now = DateTime.now().millisecondsSinceEpoch;
 
-      engine.update(now + 2000);
-      expect(engine.isFinished, false);
+        engine.update(now + 2000);
+        expect(engine.isFinished, false);
 
-      engine.update(now + 10000);
-      expect(engine.isFinished, false);
-    });
+        engine.update(now + 10000);
+        expect(engine.isFinished, false);
+      },
+    );
 
     test('Deep tease phase does not trigger orange strike window despite being close to center', () {
       final engine = FishingTimingEngine();
@@ -110,20 +121,29 @@ void main() {
         }
       }
 
-      expect(engine.isFinished, false,
-          reason: 'Engine must keep cycling indefinitely after missed strikes');
+      expect(
+        engine.isFinished,
+        false,
+        reason: 'Engine must keep cycling indefinitely after missed strikes',
+      );
     });
 
-    test('Radius snaps to exact target value at phase boundary (no float drift)', () {
-      final engine = FishingTimingEngine();
-      int simulatedTime = DateTime.now().millisecondsSinceEpoch;
+    test(
+      'Radius snaps to exact target value at phase boundary (no float drift)',
+      () {
+        final engine = FishingTimingEngine();
+        int simulatedTime = DateTime.now().millisecondsSinceEpoch;
 
-      // Jump far ahead to force many phase completions
-      engine.update(simulatedTime + 999999);
-      // Radius must never exceed maxOuterRadius or drop below innerRingRadius during teasing
-      expect(engine.currentRadius, lessThanOrEqualTo(FishingTimingEngine.maxOuterRadius + 1.0));
-      expect(engine.isFinished, false);
-    });
+        // Jump far ahead to force many phase completions
+        engine.update(simulatedTime + 999999);
+        // Radius must never exceed maxOuterRadius or drop below innerRingRadius during teasing
+        expect(
+          engine.currentRadius,
+          lessThanOrEqualTo(FishingTimingEngine.maxOuterRadius + 1.0),
+        );
+        expect(engine.isFinished, false);
+      },
+    );
   });
 
   group('LootEngine Tests', () {
@@ -160,10 +180,7 @@ void main() {
       locationId: 'loc_test',
     );
 
-    final itemMap = {
-      commonItem.id: commonItem,
-      rareItem.id: rareItem,
-    };
+    final itemMap = {commonItem.id: commonItem, rareItem.id: rareItem};
 
     final allItems = [commonItem, rareItem];
 
@@ -180,30 +197,36 @@ void main() {
       expect(testLocation.availableItemIds.contains(caught!.id), true);
     });
 
-    test('LootEngine with timingBonus=0.0 (pre-orange miss) uses base weights', () {
-      // Even with 0 bonus, a valid item from pool should still be returned
-      final engine = LootEngine(rng: Random(1));
-      final caught = engine.rollCatch(
-        location: testLocation,
-        itemMap: itemMap,
-        fallbackItems: allItems,
-        timingBonus: 0.0,
-      );
-      expect(caught, isNotNull);
-      expect(testLocation.availableItemIds.contains(caught!.id), true);
-    });
+    test(
+      'LootEngine with timingBonus=0.0 (pre-orange miss) uses base weights',
+      () {
+        // Even with 0 bonus, a valid item from pool should still be returned
+        final engine = LootEngine(rng: Random(1));
+        final caught = engine.rollCatch(
+          location: testLocation,
+          itemMap: itemMap,
+          fallbackItems: allItems,
+          timingBonus: 0.0,
+        );
+        expect(caught, isNotNull);
+        expect(testLocation.availableItemIds.contains(caught!.id), true);
+      },
+    );
 
-    test('LootEngine with perfect accuracy (1.0) still returns a valid item', () {
-      final engine = LootEngine(rng: Random(99));
-      final caught = engine.rollCatch(
-        location: testLocation,
-        itemMap: itemMap,
-        fallbackItems: allItems,
-        timingBonus: 1.0,
-      );
-      expect(caught, isNotNull);
-      expect(testLocation.availableItemIds.contains(caught!.id), true);
-    });
+    test(
+      'LootEngine with perfect accuracy (1.0) still returns a valid item',
+      () {
+        final engine = LootEngine(rng: Random(99));
+        final caught = engine.rollCatch(
+          location: testLocation,
+          itemMap: itemMap,
+          fallbackItems: allItems,
+          timingBonus: 1.0,
+        );
+        expect(caught, isNotNull);
+        expect(testLocation.availableItemIds.contains(caught!.id), true);
+      },
+    );
 
     test('LootEngine with minimum accuracy (0.65) grants no rarity bonus', () {
       // timingBonus=0.65 normalizes to 0.0, so bonus should be identical to timingBonus=0.0
@@ -222,10 +245,15 @@ void main() {
         location: testLocation,
         itemMap: itemMap,
         fallbackItems: allItems,
-        timingBonus: 0.65, // Should normalize to 0.0 — same RNG roll => same item
+        timingBonus:
+            0.65, // Should normalize to 0.0 — same RNG roll => same item
       );
-      expect(result1?.id, result2?.id,
-          reason: 'Edge accuracy (0.65) should give same result as no bonus (0.0)');
+      expect(
+        result1?.id,
+        result2?.id,
+        reason:
+            'Edge accuracy (0.65) should give same result as no bonus (0.0)',
+      );
     });
 
     test('LootEngine returns fallback item when pool is empty', () {
