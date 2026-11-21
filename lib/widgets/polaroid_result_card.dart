@@ -137,7 +137,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
           ShareParams(
             files: [XFile(file.path)],
             text:
-                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! ðŸŽ£ðŸ¤–',
+                'I just dredged up "${widget.item.name}" (${widget.item.rarityStars}) in Junk Fishing! 🎣🤖',
           ),
         );
       }
@@ -439,7 +439,7 @@ class _PolaroidResultCardState extends State<PolaroidResultCard>
 
                                   // Flavor Text
                                   Text(
-                                    'â€œ${item.flavorText}â€',
+                                    '“${item.flavorText}”',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontStyle: FontStyle.italic,

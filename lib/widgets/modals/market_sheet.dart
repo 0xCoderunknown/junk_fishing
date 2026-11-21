@@ -226,7 +226,7 @@ class _MarketSheetState extends State<MarketSheet> {
                             Text(
                               inventory.isEmpty
                                   ? 'Bag is currently empty'
-                                  : '${inventory.length} items worth ðŸª™ $scrapTotalValue coins',
+                                  : '${inventory.length} items worth 🪙 $scrapTotalValue coins',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.6),
                                 fontSize: 12,

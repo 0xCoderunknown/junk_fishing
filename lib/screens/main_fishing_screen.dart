@@ -74,7 +74,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
 
   // --- State Transitions ---
 
-  /// 1 -> 2: IDLE_MENU -> FISHING_READY
+  /// Prepare fishing / check resources (bait & inventory)
   void _startFishingPreparation() {
     if (!_gameService.playerState.hasStorageSpace ||
         _gameService.playerState.baitCount <= 0) {
@@ -250,9 +250,7 @@ class _MainFishingScreenState extends State<MainFishingScreen> {
     }
 
     final location = _gameService.currentLocation;
-    final isMenuVisible =
-        _fishingState == FishingState.idleMenu ||
-        _fishingState == FishingState.readyToCast;
+    final isMenuVisible = _fishingState == FishingState.readyToCast;
 
     return Scaffold(
       backgroundColor: Colors.black,

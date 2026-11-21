@@ -1,9 +1,5 @@
 /// Single-screen state machine states for Junk Fishing.
 enum FishingState {
-  /// Isometric background with character near water.
-  /// Collapsible navigation menu visible on the left.
-  idleMenu,
-
   /// Menu slides off-screen. Tapping the water pond initiates the cast.
   readyToCast,
 

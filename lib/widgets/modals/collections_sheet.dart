@@ -207,7 +207,7 @@ class CollectionsSheet extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'CLAIM ðŸª™ ${col.rewardMoney} REWARD',
+                        'CLAIM 🪙 ${col.rewardMoney} REWARD',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),

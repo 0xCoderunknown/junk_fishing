@@ -153,7 +153,6 @@ void main() {
 
     test('FishingState enum sequence matches state machine charter', () {
       expect(FishingState.values, [
-        FishingState.idleMenu,
         FishingState.readyToCast,
         FishingState.rippleActive,
         FishingState.pullingRod,

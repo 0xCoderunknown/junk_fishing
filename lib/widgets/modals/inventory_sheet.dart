@@ -64,11 +64,11 @@ class _InventorySheetState extends State<InventorySheet> {
             child: Row(
               children: [
                 _buildFilterChip('All', 0),
-                _buildFilterChip('â˜… Common', 1),
-                _buildFilterChip('â˜…â˜… Uncommon', 2),
-                _buildFilterChip('â˜…â˜…â˜… Rare', 3),
-                _buildFilterChip('â˜…â˜…â˜…â˜… Epic', 4),
-                _buildFilterChip('â˜…â˜…â˜…â˜…â˜… Legendary', 5),
+                _buildFilterChip('★ Common', 1),
+                _buildFilterChip('★★ Uncommon', 2),
+                _buildFilterChip('★★★ Rare', 3),
+                _buildFilterChip('★★★★ Epic', 4),
+                _buildFilterChip('★★★★★ Legendary', 5),
               ],
             ),
           ),
@@ -148,7 +148,7 @@ class _InventorySheetState extends State<InventorySheet> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const Text(
-                                        'ðŸª™',
+                                        '🪙',
                                         style: TextStyle(fontSize: 8),
                                       ),
                                       const SizedBox(width: 2),

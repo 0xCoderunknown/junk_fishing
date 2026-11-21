@@ -7,7 +7,7 @@
 
 ## 1. Project Identity & Vision
 
-- **App Name**: Junk Fishing
+- **App Name**: Junk Fishing (Official Title: `JUNK FISHING`)
 - **Platform Target**: Android-only casual/gacha collection game built with Flutter.
 - **Orientation**: Portrait-only (`DeviceOrientation.portraitUp`). All UI components, hit targets, and touch interactions must cater strictly to one-handed mobile touch ergonomics.
 - **Theme & Lore**: Instead of catching ordinary fish, the player dredges absurd junk, bizarre relics, obsolete technology, and eccentric curiosities from forgotten wells and strange waterways.
@@ -22,15 +22,16 @@
   - `items.json`: Absurd items, rarity stars (1 to 5), scrap coin values, weights, flavor text.
   - `locations.json`: Fishing zones, difficulty multipliers, water/theme hex colors, available item drop IDs.
   - `collections.json`: Absurd thematic milestone sets and coin rewards.
-- **NEVER** introduce remote servers, web APIs, cloud databases, ads, or non-deterministic external dependencies without explicit user command.
+- **NEVER** introduce remote servers, web APIs, cloud databases, ads, analytics, or non-deterministic external dependencies without explicit user command.
 
 ### Pillar II: Single-Screen Stack State Machine
 - The entire game executes within a single `Scaffold` (`MainFishingScreen`) utilizing a layered Flutter `Stack`.
-- State transitions strictly follow the `FishingState` enum:
+- State transitions strictly follow the 4-state `FishingState` enum:
   ```
   readyToCast ──(tap hole)──> rippleActive ──(tap orange)──> pullingRod (1.5s) ──> resultModal ──(dismiss)──> readyToCast
   ```
 - **Direct Cast Loop**: The app launches directly into `readyToCast` (`[TAP THE HOLE]`). When a result card is dismissed, the game returns directly to `readyToCast` for immediate replayability.
+- **Legacy States Dropped**: The legacy `idleMenu` state is completely removed. There is no intermediate idle menu state.
 - **NEVER** replace this state stack with traditional multi-route page navigation (`Navigator.push`). All secondary features (Market, Inventory, Collections, Map, Settings) are secondary bottom sheets (`showModalBottomSheet`) or overlays on top of this state stack.
 
 ### Pillar III: Separation of Concerns (Engine vs Presentation)
@@ -90,12 +91,12 @@ The fishing minigame is inspired by the Torchlight fishing timing mechanic, tune
 ### B. The Loot Engine (`LootEngine`)
 - When a catch succeeds, `LootEngine.rollCatch()` selects an item from the current location's `availableItemIds`.
 - Drop rolls use weighted rarity thresholds:
-  - 1 Star (Common): High probability (~55%)
-  - 2 Stars (Uncommon): Moderate probability (~25%)
-  - 3 Stars (Rare): Low probability (~13%)
+  - 1 Star (Common): High probability (~50%)
+  - 2 Stars (Uncommon): Moderate probability (~28%)
+  - 3 Stars (Rare): Low probability (~14%)
   - 4 Stars (Epic): Rare probability (~6%)
-  - 5 Stars (Legendary): Extreme rarity (~1%)
-- Timing accuracy from the tap provides a bonus multiplier toward higher rarity brackets.
+  - 5 Stars (Legendary): Extreme rarity (~2%)
+- Timing accuracy from the tap provides a bonus multiplier toward higher rarity brackets (shifting odds toward 3★, 4★, and 5★ tiers).
 
 ### C. The Economy & Market (`MarketSheet`)
 - **Top HUD**: Strictly displays only three core resources in a clean capsule:
@@ -115,32 +116,51 @@ The fishing minigame is inspired by the Torchlight fishing timing mechanic, tune
 Whenever an AI agent touches this project, the agent **MUST** adhere to the following checklist:
 
 1. **State Machine Integrity**:
-   - Never bypass the `FishingState` flow.
-   - Never split `MainFishingScreen` into separate route navigators.
+   - Never bypass the 4-state `FishingState` flow (`readyToCast`, `rippleActive`, `pullingRod`, `resultModal`).
+   - Never reintroduce `idleMenu` or split `MainFishingScreen` into separate route navigators.
    - The app must always launch directly in `FishingState.readyToCast` and return to `readyToCast` upon dismissal.
-2. **Zero Linter Warnings**:
+2. **Modern Imports & Deprecation Bans**:
+   - **BANNED**: `package:flutter/material.dart` and `package:flutter/cupertino.dart` are deprecated in Flutter 3.50+ and strictly forbidden.
+   - **REQUIRED**: All UI code MUST import `package:material_ui/material_ui.dart`.
+3. **Zero Linter Warnings**:
    - Run `flutter analyze` after every modification.
-   - Zero errors and zero warnings are acceptable. Remove any unused imports or variables immediately.
-3. **Automated Test Validation**:
+   - Zero errors and zero warnings are acceptable. Remove any unused imports, dead variables, or obsolete code immediately.
+4. **Automated Test Validation**:
    - Run `flutter test` after code changes.
-   - All tests in `test/` must pass before finishing your turn.
+   - All tests in `test/` must pass (100% pass rate) before completing your turn.
    - If engine mechanics or state transitions change, update the corresponding test cases in `test/engine_test.dart` or `test/models_and_service_test.dart`.
-4. **Player-Focused CHANGELOG.md Updates**:
+5. **UTF-8 Encoding & Anti-Mojibake Mandate**:
+   - All source code, data files, tests, and markdown files MUST be encoded in strict UTF-8 without BOM.
+   - Corrupted byte sequences (e.g. `â˜…`, `ðŸª™`, `â€¢`, `â€”`, `â€œ`) are strictly prohibited. Always use clean UTF-8 literals: `★`, `🪙`, `•`, `—`, `“`, `”`, `→`, `°`, `×`.
+6. **Player-Focused CHANGELOG.md Updates**:
    - Document user-facing features, balance tweaks, visual enhancements, and bug fixes under standard sections (`Added`, `Changed`, `Fixed`).
    - Do not pollute `CHANGELOG.md` with internal code refactoring trivia, plumbing details, or build-environment notes. Keep it clean and meaningful.
-5. **Local JSON Consistency**:
+7. **Local JSON Consistency**:
    - If adding new items in `assets/data/items.json`, ensure their `id` is mapped to at least one entry in `locations.json` and a matching category in `collections.json`.
-6. **Git Protocol**:
+8. **Git Protocol**:
    - Maintain clean, descriptive commit messages describing what changed and why.
 
 ---
 
-## 5. Environment & Tooling Troubleshooting Notes
+## 5. Toolchain Baseline & Dropped Legacy Support
 
-- **Android SDK & NDK**:
-  - Android SDK is located at `C:\Users\coderunknown\AppData\Local\Android\Sdk`.
-  - Platforms 34, 35, 36 and CMake 3.22.1 are installed.
+### Dropped Legacy Support (Strictly Prohibited)
+- **NO Legacy Java**: JDK 8, 11, and 17 are deprecated/dropped. Java 24 is the pinned standard.
+- **NO Legacy Gradle**: Gradle < 9.0 is dropped. Gradle 9.5.0 is the project standard.
+- **NO Legacy AGP**: Android Gradle Plugin < 9.0 is dropped. AGP 9.3.1 is the project standard.
+- **NO Legacy Kotlin**: Kotlin < 2.4.0 is dropped. Kotlin 2.4.20 is the project standard.
+- **NO Legacy Deprecated Gradle DSL**: `kotlinOptions { jvmTarget = ... }` is forbidden. Use `kotlin { jvmToolchain(24) }`.
+- **NO Multi-Platform Targets**: Web, iOS, macOS, Windows desktop, and Linux targets are explicitly unsupported and removed. The app is 100% Android-only.
+
+### Active Pinned Toolchain Specifications
+- **Flutter SDK**: `>= 3.50.0`
+- **Dart SDK**: `^3.14.0` (Dart 3 with records, patterns, sealed classes, and sound null safety)
+- **Gradle Distribution**: `9.5.0` (`android/gradle/wrapper/gradle-wrapper.properties`)
+- **Android Gradle Plugin (AGP)**: `9.3.1` (`android/settings.gradle.kts`)
+- **Kotlin Gradle Plugin**: `2.4.20` (`android/settings.gradle.kts`)
+- **JVM Toolchain**: JDK 24 (`kotlin { jvmToolchain(24) }`, `sourceCompatibility = JavaVersion.VERSION_24`, `targetCompatibility = JavaVersion.VERSION_24`)
+- **Gradle Java Home**: Pinned to `C:\Program Files\Java\jdk-24` in `android/gradle.properties` (`org.gradle.java.home=C:\\Program Files\\Java\\jdk-24`).
+- **Android SDK**: `C:\Users\coderunknown\AppData\Local\Android\Sdk` (Platforms 34, 35, 36; CMake 3.22.1).
 - **Windows Cross-Drive Pub Cache**:
-  - The project resides on `K:\Android\junk_fishing`.
-  - Pub cache is configured to `K:\Android\.pub-cache` via the user environment variable `PUB_CACHE=K:\Android\.pub-cache` to avoid Gradle cross-drive root path errors.
-  - In `android/gradle.properties`, `kotlin.incremental=false` is set to ensure reliable builds.
+  - Pub cache is isolated to `K:\Android\.pub-cache` via `PUB_CACHE=K:\Android\.pub-cache` to avoid Windows cross-drive Gradle path failures.
+  - In `android/gradle.properties`, `kotlin.incremental=false` is enforced for build stability.

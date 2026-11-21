@@ -42,7 +42,7 @@ class _MapSheetState extends State<MapSheet> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('ðŸª™ ', style: TextStyle(fontSize: 12)),
+            const Text('🪙 ', style: TextStyle(fontSize: 12)),
             Text(
               '$playerMoney',
               style: const TextStyle(
@@ -115,7 +115,7 @@ class _MapSheetState extends State<MapSheet> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Difficulty: ${loc.difficulty.toStringAsFixed(1)}x â€¢ ${loc.availableItemIds.length} items',
+                        'Difficulty: ${loc.difficulty.toStringAsFixed(1)}x • ${loc.availableItemIds.length} items',
                         style: TextStyle(
                           color: Colors.teal.shade200,
                           fontSize: 11,
@@ -191,7 +191,7 @@ class _MapSheetState extends State<MapSheet> {
                       ),
                     ),
                     child: Text(
-                      'ðŸª™ $_unlockCost',
+                      '🪙 $_unlockCost',
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
